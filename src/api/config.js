@@ -1,0 +1,1 @@
+export const endpoint = "http://34.66.141.204:8080";
