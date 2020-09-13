@@ -1,4 +1,5 @@
 import _ from "lodash"
+import imageUtil from "./image"
 
 function convertPostIntro(postIntro) {
   const { images, storyMedias } = postIntro || {}
@@ -7,13 +8,13 @@ function convertPostIntro(postIntro) {
     if (_.isEmpty(i.videoSrc)) return { imageSrc: i.imageSrc }
     return { videoSrc: i.videoSrc }
   })
-  return { ...postIntro, imageList: imagesString, storyMedias: storyMediasData }
+  return { ...postIntro, images: imagesString, storyMedias: storyMediasData }
 }
 
 function convertPostIntroForm(postIntroResponse) {
   if (_.isEmpty(postIntroResponse)) return {}
-  const { id, imageList, intro, policy, story, storyMedias, userManual, videoIntro } = postIntroResponse || {}
-  return { id, imageList, intro, policy, story, storyMedias, userManual, videoIntro }
+  const { id, images, intro, policy, story, storyMedias, userManual, videoIntro } = postIntroResponse || {}
+  return { id, images: imageUtil.addIdImage(images), intro, policy, story, storyMedias, userManual, videoIntro }
 }
 
 export default {

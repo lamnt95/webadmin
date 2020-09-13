@@ -113,6 +113,7 @@ function PostIntroScreen(props) {
           activeItem={postIntroActive}
           onUpdateScreen={onUpdateScreen}
           onEdit={onEdit}
+          activeDropdown={activeDropdown}
         />
       </WrapperTable>
       <WrapperForm>

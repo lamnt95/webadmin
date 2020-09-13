@@ -27,7 +27,7 @@ function getAction(data) {
 }
 
 function PostIntroTableRow(props) {
-  const { data, onCheck, onReject, onEdit, isActive } = props;
+  const { data, onCheck, onReject, onEdit, isActive, activeDropdown } = props;
   const { id, updatedDate } = data || {};
   const isDisable = false;
   const status = getStatus(data)
@@ -43,9 +43,9 @@ function PostIntroTableRow(props) {
           id={id}
           isDisable={isDisable}
           isActive={isActive}
-          isShowEdit
-          isShowReject
-          isShowApprove
+          isShowEdit={activeDropdown === "APPROVE"}
+          isShowReject={activeDropdown === "PENDING"}
+          isShowApprove={activeDropdown === "PENDING"}
           onApprove={onCheck}
           onReject={onReject}
           onEdit={onEdit}

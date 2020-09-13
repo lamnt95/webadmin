@@ -22,9 +22,15 @@ function getOrder(orderId) {
   return api.get(url).then(({ data }) => data)
 }
 
+function changeOrderPaidStatus(orderId, paidStatus) {
+  const url = `/restaurant-cake-api/v1/orders/change-paid-status/${orderId}?targetStatus=${paidStatus}`
+  return api.put(url);
+}
+
 export default {
   queryOrder,
   createOrder,
   checkOrder,
-  getOrder
+  getOrder,
+  changeOrderPaidStatus
 }

@@ -8,7 +8,7 @@ import api from "../../api"
 
 function CategoriesTable(props) {
 
-  const { data, isLoading, onUpdateScreen, onEditCategory,activeItem } = props;
+  const { data, isLoading, onUpdateScreen, onEditCategory,activeItem, activeDropdown } = props;
 
 
   if (isLoading)
@@ -66,6 +66,7 @@ function CategoriesTable(props) {
             onEditCategory={onEditCategory}
             onDeleteCategory={onDeleteCategory}
             onPublishCategory={onPublishCategory}
+            activeDropdown={activeDropdown}
           />
         ))}
       </Table.Body>

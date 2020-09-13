@@ -109,6 +109,7 @@ function CategoriesScreen(props) {
           activeItem={categoryActive}
           onUpdateScreen={onUpdateScreen}
           onEditCategory={onEditCategory}
+          activeDropdown={activeDropdown}
         />
       </WrapperTable>
       <WrapperForm>

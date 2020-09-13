@@ -8,7 +8,7 @@ import api from "../../api"
 
 function PostTable(props) {
 
-  const { data, isLoading, onUpdateScreen, onEdit,activeItem } = props;
+  const { data, isLoading, onUpdateScreen, onEdit,activeItem,activeDropdown } = props;
 
 
   if (isLoading)
@@ -60,6 +60,7 @@ function PostTable(props) {
             onReject={onReject}
             onEdit={onEdit}
             onDelete={onDelete}
+            activeDropdown={activeDropdown}
           />
         ))}
       </Table.Body>

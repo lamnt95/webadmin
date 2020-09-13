@@ -27,7 +27,7 @@ function getAction(data) {
 }
 
 function CategoriesTableRow(props) {
-  const { data, onCheckCategory, onRejectCategory, onEditCategory, isActive, onDeleteCategory,onPublishCategory } = props;
+  const { data, onCheckCategory, onRejectCategory, onEditCategory, isActive, onDeleteCategory, onPublishCategory, activeDropdown } = props;
   const { id, name, updatedDate, publish } = data || {};
   const isDisable = false;
   const status = getStatus(data)
@@ -45,19 +45,16 @@ function CategoriesTableRow(props) {
           id={id}
           isDisable={isDisable}
           isActive={isActive}
-          isShowEdit
-          isShowReject
-          isShowDelete
-          isShowPublish
-          isShowApprove
+          isShowEdit={activeDropdown === "APPROVE"}
+          isShowReject={activeDropdown === "PENDING"}
+          isShowDelete={activeDropdown === "APPROVE"}
+          isShowPublish={activeDropdown === "APPROVE"}
+          isShowApprove={activeDropdown === "PENDING"}
           onApprove={onCheckCategory}
           onReject={onRejectCategory}
           onDelete={onDeleteCategory}
           onEdit={onEditCategory}
           onPublish={onPublishCategory}
-        // updateModifyItem={updateModifyItem}
-        // invisibleItem={invisibleItem}
-        // visibleItem={visibleItem}
         />
       </Cell>
     </TableRow>

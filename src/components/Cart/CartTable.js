@@ -44,6 +44,12 @@ function CartTable(props) {
             Trạng thái
           </Header>
           <Header textAlign="center" width={100}>
+            Thanh toán
+          </Header>
+          <Header textAlign="center" width={250}>
+            Đổi trạng thái thanh toán
+          </Header>
+          <Header textAlign="center" width={100}>
             Hành động
           </Header>
         </Table.Row>
@@ -56,6 +62,7 @@ function CartTable(props) {
             onRejectOrder={onRejectOrder}
             onEditOrder={onEditOrder}
             onDeleteOrder={onDeleteOrder}
+            onUpdateScreen={onUpdateScreen}
           />
         ))}
       </Table.Body>

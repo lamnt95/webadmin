@@ -1,8 +1,35 @@
 import _ from "lodash";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TableRow, Cell } from "../TableStyle";
 import RowManipulation from "../RowManipulation";
 import dateUtils from "../../utils/date";
+import { Dropdown, Button } from 'semantic-ui-react'
+import api from "../../api"
+
+const PAID_TEXT = {
+  UNPAID: "Chưa thanh toán",
+  FULL_PAID: "Đã thanh toán",
+  PARTIALLY_PAID: "Thanh toán một phần",
+}
+
+
+const paidDropdown = [
+  {
+    key: 'UNPAID',
+    value: 'UNPAID',
+    text: PAID_TEXT.UNPAID,
+  },
+  {
+    key: 'FULL_PAID',
+    value: 'FULL_PAID',
+    text: PAID_TEXT.FULL_PAID,
+  },
+  {
+    key: 'PARTIALLY_PAID',
+    value: 'PARTIALLY_PAID',
+    text: PAID_TEXT.PARTIALLY_PAID,
+  }
+]
 
 function getStatus(data) {
   const { orderStatus } = data || {};
@@ -18,16 +45,34 @@ function getStatus(data) {
 }
 
 function ProductRow(props) {
-  const { data, onCheckOrder, onRejectOrder, onEditOrder, isActive, onDeleteOrder } = props;
-  const { id, code, updatedDate,totalCostAfterPromotion } = data || {};
+  const { data, onCheckOrder, onRejectOrder, onEditOrder, isActive, onDeleteOrder,onUpdateScreen } = props;
+  const { id, code, updatedDate, totalCostAfterPromotion, paidStatus } = data || {};
   const isDisable = false;
   const status = getStatus(data)
+  const [paidStatusTemp, setPaidStatusTemp] = useState();
+
+  useEffect(() => { setPaidStatusTemp(paidStatus) }, [paidStatus])
+
   return (
     <TableRow isActive={isActive} isDisable={isDisable}>
       <Cell width={150}>{code}</Cell>
       <Cell>{totalCostAfterPromotion}</Cell>
       <Cell textAlign="center">{dateUtils.formatDate(updatedDate) || ""}</Cell>
       <Cell textAlign="center">{status}</Cell>
+      <Cell textAlign="center">{PAID_TEXT[paidStatus] || ""}</Cell>
+      <Cell>
+        <div style={{ display: "flex", flexDirection: "row" }} >
+          <Dropdown
+            placeholder='Select Friend'
+            fluid
+            selection
+            onChange={(e, { value }) => setPaidStatusTemp(value)}
+            value={paidStatusTemp}
+            options={paidDropdown}
+          />
+          <Button onClick={() => api.changeOrderPaidStatus(id, paidStatusTemp).then(onUpdateScreen)}>Đổi</Button>
+        </div>
+      </Cell>
       <Cell width={200}>
         <RowManipulation
           id={id}
@@ -37,6 +82,7 @@ function ProductRow(props) {
           isShowReject
           isShowDelete
           isShowApprove
+          isShowDropdown
           onApprove={onCheckOrder}
           onReject={onRejectOrder}
           onDelete={onDeleteOrder}

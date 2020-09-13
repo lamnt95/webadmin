@@ -113,7 +113,7 @@ function PostIntroForm(props) {
   const { id, onUpdateScreen, onCancel, data } = props;
   const isShowFormFix = !!id;
   const { intro, story, userManual, policy, videoIntro } = postIntro || {};
-  const imageList = _.get(postIntro, "imageList") || [];
+  const images = _.get(postIntro, "images") || [];
   const storyMedias = _.get(postIntro, "storyMedias") || [];
 
   const title = isShowFormFix ? "Sửa giới thiệu chung" : "Thêm giới thiệu chung";
@@ -176,14 +176,14 @@ function PostIntroForm(props) {
   }
 
   const onRemoveImageSrc = (imageId) => {
-    const imageListNew = _.filter(imageList, i => i.id !== imageId)
-    const postIntroNew = { ...postIntro, imageList: imageListNew };
+    const imagesNew = _.filter(images, i => i.id !== imageId)
+    const postIntroNew = { ...postIntro, images: imagesNew };
     setPostIntro(postIntroNew);
   }
 
   const onAddImageSrc = () => {
-    const imageListNew = [...imageList, utils.addIdOneImage(image)];
-    const postIntroNew = { ...postIntro, imageList: imageListNew };
+    const imagesNew = [...images, utils.addIdOneImage(image)];
+    const postIntroNew = { ...postIntro, images: imagesNew };
     setPostIntro(postIntroNew);
   }
 
@@ -227,7 +227,7 @@ function PostIntroForm(props) {
         <FormField>
           <AddImage
             title="Ảnh Slide giới thiệu"
-            images={imageList}
+            images={images}
             value={image}
             onChange={onChangeImageSrc}
             onRemove={onRemoveImageSrc}

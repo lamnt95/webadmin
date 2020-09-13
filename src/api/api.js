@@ -29,14 +29,10 @@ function callApi(
   }
   return axios(optionsAxios)
     .then(response => {
-      if (response.status >= 200 && response.status < 300) {
         return Promise.resolve(response);
-      }
-      return Promise.reject(response.data);
     })
     .catch(err => {
-      console.log("error", err)
-      toast.error(err)
+      toast.error("Đã có lỗi xảy ra, liên hệ kĩ thuật để được hỗ trợ")
       return Promise.reject(err);
     });
 }

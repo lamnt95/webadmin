@@ -117,6 +117,7 @@ function ProductScreen(props) {
           activeItem={productActive}
           onUpdateScreen={onUpdateScreen}
           onEditProduct={onEditProduct}
+          activeDropdown={activeDropdown}
         />
       </WrapperTable>}
       {isCreateProduct && <WrapperForm>

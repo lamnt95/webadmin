@@ -8,7 +8,7 @@ import api from "../../api"
 
 function ProductTable(props) {
 
-  const { data, isLoading, onUpdateScreen, onEditProduct, activeItem } = props;
+  const { data, isLoading, onUpdateScreen, onEditProduct, activeItem, activeDropdown } = props;
 
 
   if (isLoading)
@@ -46,9 +46,6 @@ function ProductTable(props) {
           <Header textAlign="center" width={100}>
             Hành động
           </Header>
-          <Header textAlign="center" width={100}>
-            Xuất bản
-          </Header>
           <Header textAlign="center" width={120}>
             Thao tác
           </Header>
@@ -62,6 +59,7 @@ function ProductTable(props) {
             onRejectProduct={onRejectProduct}
             onEditProduct={onEditProduct}
             onDeleteProduct={onDeleteProduct}
+            activeDropdown={activeDropdown}
           />
         ))}
       </Table.Body>

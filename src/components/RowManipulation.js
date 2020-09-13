@@ -13,6 +13,7 @@ function RowManipulation(props) {
     isShowDelete,
     isShowPublish,
     isShowApprove,
+    isShowDropdown,
     onPublish,
     onApprove,
     onDelete,

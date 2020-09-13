@@ -171,10 +171,12 @@ function ProductForm(props) {
   useEffect(() => {
     api.queryProduct({ size: 10000 }).then(({ content: products }) => {
       setProducts(products)
-      api.getOrder(id).then(order => {
-        const cart = orderToCartState(order, products);
-        setCart(cart)
-      })
+      if (!_.isEmpty(id)) {
+        api.getOrder(id).then(order => {
+          const cart = orderToCartState(order, products);
+          setCart(cart)
+        })
+      }
     });
 
   }, [id])
@@ -337,7 +339,7 @@ function ProductForm(props) {
           />
         </FormField>}
 
-       
+
         {/*  */}
         <FormField>
           <Label>

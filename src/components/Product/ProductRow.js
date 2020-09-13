@@ -27,12 +27,11 @@ function getAction(data) {
 }
 
 function ProductRow(props) {
-  const { data, onCheckProduct, onRejectProduct, onEditProduct, isActive, onDeleteProduct } = props;
-  const { id, name, updatedDate, publish,price } = data || {};
+  const { data, onCheckProduct, onRejectProduct, onEditProduct, isActive, onDeleteProduct, activeDropdown } = props;
+  const { id, name, updatedDate, price } = data || {};
   const isDisable = false;
   const status = getStatus(data)
   const action = getAction(data)
-  const publishStatus = publish ? "Xuất bản" : "Chưa xuất bản"
   return (
     <TableRow isActive={isActive} isDisable={isDisable}>
       <Cell width={150}>{name}</Cell>
@@ -40,16 +39,15 @@ function ProductRow(props) {
       <Cell textAlign="center">{dateUtils.formatDate(updatedDate) || ""}</Cell>
       <Cell textAlign="center">{status}</Cell>
       <Cell textAlign="center">{action}</Cell>
-      <Cell textAlign="center">{publishStatus}</Cell>
       <Cell width={200}>
         <RowManipulation
           id={id}
           isDisable={isDisable}
           isActive={isActive}
-          isShowEdit
-          isShowReject
-          isShowDelete
-          isShowApprove
+          isShowEdit={activeDropdown === "APPROVE"}
+          isShowReject={activeDropdown === "PENDING"}
+          isShowDelete={activeDropdown === "APPROVE"}
+          isShowApprove={activeDropdown === "PENDING"}
           onApprove={onCheckProduct}
           onReject={onRejectProduct}
           onDelete={onDeleteProduct}

@@ -122,7 +122,7 @@ function ProductForm(props) {
 
   const { id, onUpdateScreen, onCancel } = props;
   const isShowFormFix = !!id;
-  const { name, price, description } = product || {};
+  const { name, price, description, unit } = product || {};
   const subImages = _.get(product, "subImages") || [];
   const image = _.get(product, "image") || [];
   const title = isShowFormFix ? "Sửa sản phẩm" : "Thêm sản phẩm";
@@ -289,6 +289,21 @@ function ProductForm(props) {
             placeholder={"Nhập mô tả"}
             value={description || ""}
             name="description"
+            onInput={onChangeText}
+            onFocus={() => setIsDistinc(true)}
+          />
+          <MessageError isShow={isDistinc && descriptionError} messages={descriptionError} />
+        </FormField>
+
+        <FormField>
+          <Label>
+            Đơn vị sản phẩm
+            <TextWarning />
+          </Label>
+          <Input
+            placeholder={"Nhập đơn vị"}
+            value={unit || ""}
+            name="unit"
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />

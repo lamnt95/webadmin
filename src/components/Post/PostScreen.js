@@ -144,6 +144,7 @@ function PostScreen(props) {
           activeItem={postActive}
           onUpdateScreen={onUpdateScreen}
           onEdit={onEditPost}
+          activeDropdown={activeDropdown}
         />}
         {isShowPostForm &&
           <div style={{ marginTop: 15 }}>

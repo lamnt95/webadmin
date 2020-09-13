@@ -36,6 +36,7 @@ function deletePromotion(id) {
 }
 
 function updatePromotion(body = {}) {
+  const { id } = body || {}
   const url = `/restaurant-cake-api/v1/admin/promotions/${id}`
   return api.put(url, body).then(({ data }) => data)
 }
