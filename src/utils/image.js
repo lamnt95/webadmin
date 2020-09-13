@@ -9,7 +9,12 @@ function addIdOneImage(image) {
   return { id: uuidv4(), data: image }
 }
 
+function addIdOneStoryMedia(storyMedia, type) {
+  return { id: uuidv4(), [type]: storyMedia }
+}
+
 export default {
   addIdImage,
-  addIdOneImage
+  addIdOneImage,
+  addIdOneStoryMedia
 }

@@ -28,7 +28,7 @@ const FormButton = styled(Button)`
   margin-right: ${(props) => `${props.right}px!important`};
 `;
 
-export default function AddImage({ title, onChange, onAdd, errors, images, onFocus, onRemove, value }) {
+export default function AddImage({ title, onChange, onAdd, errors, images, onFocus, onRemove, value, btnTitle = "Thêm ảnh", errorText = "Không có ảnh nào", mapType }) {
   return <>
     <Label>
       {title}
@@ -51,16 +51,26 @@ export default function AddImage({ title, onChange, onAdd, errors, images, onFoc
       onClick={onAdd}
       disabled={!_.isEmpty(errors)}
     >
-      Thêm ảnh
+      {btnTitle}
     </FormButton>
     <div style={{ marginTop: 15 }}>
-      {_.isEmpty(images) ? "Không có ảnh nào" : _.map(images, i => <div key={i.id} style={{ flexDirection: "row", display: "flex" }}>
-        <a href={i.data} target="blank">{i.data}</a>
-        <i
-          className="fas fa-trash"
-          onClick={() => onRemove(i.id)}
-          style={{ fontSize: 20, cursor: "pointer", marginLeft: 5 }}
-        />
+      {_.isEmpty(images) ? errorText : _.map(images, i => <div key={i.id} style={{ flexDirection: "column", display: "flex" }}>
+        {i.type && mapType && <div style={{ flexDirection: "row", display: "flex" }}>
+          <div style={{ marginRight: 5 }}>-------------{mapType(i.type)}-------------</div>
+          <i
+            className="fas fa-trash"
+            onClick={() => onRemove(i.id)}
+            style={{ fontSize: 20, cursor: "pointer", marginLeft: 5 }}
+          />
+        </div>}
+        <div>
+          <a href={i.data} target="blank">{i.data}</a>
+          {(!i.type && !mapType) && <i
+            className="fas fa-trash"
+            onClick={() => onRemove(i.id)}
+            style={{ fontSize: 20, cursor: "pointer", marginLeft: 5 }}
+          />}
+        </div>
       </div>)}
     </div>
   </>

@@ -182,6 +182,18 @@ const knowledgeOptions = [
     title: "Khuyến mại",
     headerTitle: "Danh sách khuyến mại",
   },
+  {
+    id: "/postIntro",
+    route: "/postIntro",
+    title: "Giới thiệu",
+    headerTitle: "Thông tin giới thiệu của trang chủ",
+  },
+  {
+    id: "/post",
+    route: "/post",
+    title: "Bài viết",
+    headerTitle: "Quản lý bài viết",
+  },
 ];
 
 const goodsOptions = [

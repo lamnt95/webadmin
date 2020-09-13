@@ -4,6 +4,7 @@ import category from "./category"
 import product from "./product"
 import promotionType from "./promotionType"
 import promotion from "./promotion"
+import postIntro from "./postIntro"
 
 export default {
   ...image,
@@ -11,5 +12,6 @@ export default {
   ...product,
   ...date,
   ...promotionType,
-  ...promotion
+  ...promotion,
+  ...postIntro
 }

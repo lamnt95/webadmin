@@ -10,6 +10,8 @@
     "qa": "npm i && npm run start-prod"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^22.0.0",
+    "@ckeditor/ckeditor5-react": "^2.1.0",
     "axios": "0.19.2",
     "express": "4.17.1",
     "http-proxy-middleware": "1.0.4",

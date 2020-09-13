@@ -105,7 +105,7 @@ function mapTypeMediaStory(type) {
 }
 
 
-function CategoriesForm(props) {
+function PostForm(props) {
   const [isDistinc, setIsDistinc] = useState(false);
   const [category, setCategory] = useState(categoryInit);
   const [image, setImage] = useState();
@@ -123,7 +123,6 @@ function CategoriesForm(props) {
   const messageError = validateCategory(category);
   const { name: nameError } = messageError || {};
 
-  console.log("category", category)
 
   useEffect(() => {
     if (!!id) {
@@ -399,4 +398,4 @@ function CategoriesForm(props) {
   );
 }
 
-export default CategoriesForm;
+export default PostForm;

@@ -73,7 +73,7 @@ const FormButton = styled(Button)`
 `;
 
 function Filter(props) {
-  const { dropdownPlaceholder, optionsDropdown, onChangeFilter, activeDropdown, onClear, onSubmit, onNew } = props || {};
+  const { dropdownPlaceholder, optionsDropdown, onChangeFilter, activeDropdown, onClear, onSubmit, onNew, onCancel } = props || {};
   let inputKeyword = useRef(null);
 
   const handleClearFilter = () => {
@@ -128,6 +128,12 @@ function Filter(props) {
         onClick={onNew}
       >
         Tạo mới
+      </FormButton>}
+      {_.isFunction(onCancel) && <FormButton
+        color="gray"
+        onClick={onCancel}
+      >
+        Huỷ
       </FormButton>}
     </Container>
   );

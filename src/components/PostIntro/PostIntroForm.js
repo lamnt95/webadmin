@@ -3,8 +3,6 @@ import _ from "lodash";
 import { Button, Form } from "semantic-ui-react";
 import styled from "styled-components";
 import MessageError from "../MessageError";
-import UploadImage from "../UploadImage";
-// import imageService from "../../services/imageService";
 import TextWarning from "../TextWarning";
 import { validateCategory } from "../../validate/validate";
 import AddImage from "../AddImage"
@@ -87,8 +85,7 @@ const Input = styled.input`
   margin-top: 5px !important;
 `;
 
-const categoryInit = {
-  name: undefined,
+const postIntroInit = {
 };
 
 function storyMediasToImages(storyMedias) {
@@ -105,33 +102,29 @@ function mapTypeMediaStory(type) {
 }
 
 
-function CategoriesForm(props) {
+function PostIntroForm(props) {
   const [isDistinc, setIsDistinc] = useState(false);
-  const [category, setCategory] = useState(categoryInit);
+  const [postIntro, setPostIntro] = useState(postIntroInit);
   const [image, setImage] = useState();
   const [storyMedia, setStoryMedia] = useState();
   const [storyMediaType, setStoryMediaType] = useState("imageSrc")
   const [videoIntroInput, setVideoIntroInput] = useState()
 
-  const { id, onUpdateScreen, onCancel } = props;
+  const { id, onUpdateScreen, onCancel, data } = props;
   const isShowFormFix = !!id;
-  const { name, intro, story, userManual, policy, videoIntro } = category || {};
-  const images = _.get(category, "images") || [];
-  const storyMedias = _.get(category, "storyMedias") || [];
+  const { intro, story, userManual, policy, videoIntro } = postIntro || {};
+  const imageList = _.get(postIntro, "imageList") || [];
+  const storyMedias = _.get(postIntro, "storyMedias") || [];
 
-  const title = isShowFormFix ? "Sửa chuyên mục" : "Thêm chuyên mục";
-  const messageError = validateCategory(category);
+  const title = isShowFormFix ? "Sửa giới thiệu chung" : "Thêm giới thiệu chung";
+  const messageError = validateCategory(postIntro);
   const { name: nameError } = messageError || {};
 
-  console.log("category", category)
-
   useEffect(() => {
-    if (!!id) {
-      api.getCategory(id)
-        .then(res => ({ ...res, images: utils.addIdImage(res.images) }))
-        .then(setCategory)
-    }
+    setPostIntro(utils.convertPostIntroForm(data));
   }, [id])
+
+  console.log("PostIntroForm", postIntro)
 
   const onClickCancel = useCallback(() => {
     onCancel()
@@ -139,29 +132,29 @@ function CategoriesForm(props) {
     setStoryMedia("");
     setStoryMediaType("imageSrc");
     setVideoIntroInput("")
-    setCategory(categoryInit);
+    setPostIntro(postIntroInit);
     setIsDistinc(false);
   }, [1]);
 
   const onClickUpdateItem = useCallback(() => {
-    const categoryNew = utils.convertCategory(category)
-    api.updateCategory(categoryNew).then(() => {
+    const postIntroNew = utils.convertPostIntro(postIntro)
+    api.updatePostIntro(postIntroNew).then(() => {
       onUpdateScreen()
       onCancel()
       setImage("");
       setStoryMedia("");
       setStoryMediaType("imageSrc");
       setVideoIntroInput("")
-      setCategory(categoryInit);
+      setPostIntro(postIntroInit);
       setIsDistinc(false);
     })
 
-  }, [category])
+  }, [postIntro])
 
   const onClickCreateItem = useCallback(() => {
-    const categoryNew = utils.convertCategory(category)
-    api.createCategory(categoryNew).then(() => {
-      setCategory(categoryInit);
+    const postIntroNew = utils.convertPostIntro(postIntro)
+    api.createPostIntro(postIntroNew).then(() => {
+      setPostIntro(postIntroInit);
       setImage("");
       setStoryMedia("");
       setStoryMediaType("imageSrc");
@@ -169,13 +162,13 @@ function CategoriesForm(props) {
       onUpdateScreen();
     }).catch(console.log)
     setIsDistinc(false);
-  }, [category]);
+  }, [postIntro]);
 
   const onChangeText = useCallback((e) => {
     const { name, value } = e.target;
-    const categoryNew = { ...category, [name]: value };
-    setCategory(categoryNew);
-  }, [category])
+    const postIntroNew = { ...postIntro, [name]: value };
+    setPostIntro(postIntroNew);
+  }, [postIntro])
 
   const onChangeImageSrc = (e) => {
     const { value } = e.target || {}
@@ -183,15 +176,15 @@ function CategoriesForm(props) {
   }
 
   const onRemoveImageSrc = (imageId) => {
-    const imagesNew = _.filter(images, i => i.id !== imageId)
-    const categoryNew = { ...category, images: imagesNew };
-    setCategory(categoryNew);
+    const imageListNew = _.filter(imageList, i => i.id !== imageId)
+    const postIntroNew = { ...postIntro, imageList: imageListNew };
+    setPostIntro(postIntroNew);
   }
 
   const onAddImageSrc = () => {
-    const imagesNew = [...images, utils.addIdOneImage(image)];
-    const categoryNew = { ...category, images: imagesNew };
-    setCategory(categoryNew);
+    const imageListNew = [...imageList, utils.addIdOneImage(image)];
+    const postIntroNew = { ...postIntro, imageList: imageListNew };
+    setPostIntro(postIntroNew);
   }
 
   const onChangeStoryMedia = (e) => {
@@ -201,14 +194,14 @@ function CategoriesForm(props) {
 
   const onRemoveStoryMedia = (storyMediaId) => {
     const storyMediasNew = _.filter(storyMedias, i => i.id !== storyMediaId)
-    const categoryNew = { ...category, storyMedias: storyMediasNew };
-    setCategory(categoryNew);
+    const postIntroNew = { ...postIntro, storyMedias: storyMediasNew };
+    setPostIntro(postIntroNew);
   }
 
   const onAddStoryMedia = () => {
     const storyMediasNew = [...storyMedias, utils.addIdOneStoryMedia(storyMedia, storyMediaType)];
-    const categoryNew = { ...category, storyMedias: storyMediasNew };
-    setCategory(categoryNew);
+    const postIntroNew = { ...postIntro, storyMedias: storyMediasNew };
+    setPostIntro(postIntroNew);
   }
 
   const onChangeVideoIntro = (e) => {
@@ -217,13 +210,13 @@ function CategoriesForm(props) {
   }
 
   const onRemoveVideoIntro = () => {
-    const categoryNew = { ...category, videoIntro: undefined };
-    setCategory(categoryNew);
+    const postIntroNew = { ...postIntro, videoIntro: undefined };
+    setPostIntro(postIntroNew);
   }
 
   const onAddVideoIntro = () => {
-    const categoryNew = { ...category, videoIntro: videoIntroInput };
-    setCategory(categoryNew);
+    const postIntroNew = { ...postIntro, videoIntro: videoIntroInput };
+    setPostIntro(postIntroNew);
   }
 
   return (
@@ -233,8 +226,8 @@ function CategoriesForm(props) {
 
         <FormField>
           <AddImage
-            title="Ảnh chuyên mục"
-            images={images}
+            title="Ảnh Slide giới thiệu"
+            images={imageList}
             value={image}
             onChange={onChangeImageSrc}
             onRemove={onRemoveImageSrc}
@@ -246,27 +239,11 @@ function CategoriesForm(props) {
 
         <FormField>
           <Label>
-            Tên chuyên mục
+            Giới thiệu chung
             <TextWarning />
           </Label>
           <Input
-            placeholder={"Tên chuyên mục"}
-            value={name || ""}
-            name="name"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
-        </FormField>
-
-
-        <FormField>
-          <Label>
-            Giới thiệu về chuyên mục
-            <TextWarning />
-          </Label>
-          <Input
-            placeholder="Giới thiệu về chuyên mục"
+            placeholder="Giới thiệu chung"
             value={intro || ""}
             name="intro"
             onInput={onChangeText}
@@ -277,11 +254,11 @@ function CategoriesForm(props) {
 
         <FormField>
           <Label>
-            Câu chuyện ra đời của chuyên mục
+            Câu chuyện ra đời
             <TextWarning />
           </Label>
           <Input
-            placeholder="Câu chuyện ra đời của chuyên mục"
+            placeholder="Câu chuyện ra đời"
             value={story || ""}
             name="story"
             onInput={onChangeText}
@@ -323,11 +300,11 @@ function CategoriesForm(props) {
 
         <FormField>
           <Label>
-            Hướng dẫn sử dụng của chuyên mục
+            Hướng dẫn sử dụng
             <TextWarning />
           </Label>
           <Input
-            placeholder="Hướng dẫn sử dụng của chuyên mục"
+            placeholder="Hướng dẫn sử dụng"
             value={userManual || ""}
             name="userManual"
             onInput={onChangeText}
@@ -338,11 +315,11 @@ function CategoriesForm(props) {
 
         <FormField>
           <Label>
-            Chính sách bán hàng của chuyên mục
+            Chính sách bán hàng
             <TextWarning />
           </Label>
           <Input
-            placeholder="Hướng dẫn sử dụng của chuyên mục"
+            placeholder="Hướng dẫn sử dụng"
             value={policy || ""}
             name="policy"
             onInput={onChangeText}
@@ -353,7 +330,7 @@ function CategoriesForm(props) {
 
         <FormField>
           <AddImage
-            title="Video giới thiệu chuyên mục"
+            title="Video giới thiệu"
             images={videoIntro ? [{ id: 1, data: videoIntro }] : []}
             value={videoIntroInput}
             onChange={onChangeVideoIntro}
@@ -399,4 +376,4 @@ function CategoriesForm(props) {
   );
 }
 
-export default CategoriesForm;
+export default PostIntroForm;
