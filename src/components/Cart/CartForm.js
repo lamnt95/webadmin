@@ -171,7 +171,7 @@ function ProductForm(props) {
   useEffect(() => {
     api.queryProduct({ size: 10000 }).then(({ content: products }) => {
       setProducts(products)
-      if (!_.isEmpty(id)) {
+      if (!_.isUndefined(id)) {
         api.getOrder(id).then(order => {
           const cart = orderToCartState(order, products);
           setCart(cart)
