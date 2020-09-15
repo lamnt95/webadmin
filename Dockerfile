@@ -5,7 +5,7 @@ WORKDIR /webadmin
 COPY ./package.json ./yarn.* ./
 RUN npm i
 COPY . .
-RUN npm run build && ls -a
+# RUN npm run build && ls -a
 
 EXPOSE 3001
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]

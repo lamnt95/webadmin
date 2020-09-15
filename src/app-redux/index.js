@@ -15,7 +15,7 @@ function* rootSaga() {
 const persistConfig = {
   key: "root",
   storage: storage,
-  whitelist: ["demo"],
+  whitelist: ["auth"],
 };
 
 const persistedReducer = persistReducer(

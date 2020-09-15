@@ -1,6 +1,8 @@
 import { createWrapper } from "next-redux-wrapper";
 import { makeStore } from "../app-redux";
 
-const wrapperNextWithStore = createWrapper(makeStore, { debug: true });
+export const store = makeStore();
+
+const wrapperNextWithStore = createWrapper(() => store, { debug: true });
 
 export default wrapperNextWithStore;

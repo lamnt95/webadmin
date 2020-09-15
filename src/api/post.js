@@ -7,6 +7,11 @@ function queryPost(params = {}) {
   return api.get(url).then(({ data }) => data)
 }
 
+function getPostDetail(postId) {
+  const url = `/restaurant-cake-api/v1/admin/useful-information/${postId}`
+  return api.get(url)
+}
+
 function createPost(body) {
   const url = `/restaurant-cake-api/v1/admin/useful-information`
   return api.post(url, body).then(({ data }) => data)
@@ -30,7 +35,7 @@ function deletePost(id) {
 function updatePost(postIntro = {}) {
   const { id } = postIntro;
   const url = `/restaurant-cake-api/v1/admin/useful-information/${id}`
-  return queryPost().then(({ content }) => _.head(_.filter(content, i => i.id == id) || []) || {}).then(postIntroLatest => {
+  return getPostDetail(id).then(postIntroLatest => {
     const body = { ...postIntroLatest, ...postIntro };
     return api.put(url, body).then(({ data }) => data)
   })

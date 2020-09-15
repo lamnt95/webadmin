@@ -3,6 +3,10 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { Icon, Accordion } from "semantic-ui-react";
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux"
+import { useRouter } from "next/router"
+import { actions, selectors } from "../app-redux"
+
 
 const PushContainer = styled.div`
   width: 100%;
@@ -194,6 +198,18 @@ const knowledgeOptions = [
     title: "Bài viết",
     headerTitle: "Quản lý bài viết",
   },
+  {
+    id: "/report",
+    route: "/report",
+    title: "Báo cáo",
+    headerTitle: "Quản lý báo cáo",
+  },
+  {
+    id: "/user",
+    route: "/user",
+    title: "Thành viên",
+    headerTitle: "Quản lý thành viên",
+  },
 ];
 
 const goodsOptions = [
@@ -283,6 +299,18 @@ function AccordionSideBar(props = {}) {
 const withLayout = (props = {}) => (WrapperConponent) => {
   const { activedTab } = props;
   const { headerTitle } = knowledgeOptionsKeyBy[activedTab] || {};
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const accessUser = useSelector(selectors.auth.getAccessUser) || ""
+
+  const onSubmitSuccess = () => {
+    router.push("/login")
+  }
+
+  const onSubmit = () => {
+    dispatch(actions.auth.logoutStart(null, { onSuccess: onSubmitSuccess }))
+  }
+
   return (
     <Container>
       <PushContainer>
@@ -300,10 +328,10 @@ const withLayout = (props = {}) => (WrapperConponent) => {
               {headerTitle}
             </LeftContainer>
             <RightContainer>
-              <Username>Admin</Username>
+              <Username>{accessUser}</Username>
               <LogoutContainer>
                 {/* <IconLogout icon={faSignOutAlt} fontSize={20} color="#409eff" /> */}
-                <Logout>Đăng xuất</Logout>
+                <Logout onClick={onSubmit}>Đăng xuất</Logout>
               </LogoutContainer>
             </RightContainer>
           </HeaderContainer>
