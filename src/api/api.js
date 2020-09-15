@@ -2,16 +2,13 @@ import axios from "axios";
 import _ from "lodash";
 import { toast } from 'react-toastify';
 import { selectors } from "../app-redux"
-import { store } from "../hoc/wrapperNextWithStore"
 
 // export const domain = "http://34.66.141.204:8080";
 export const domain = "http://202.92.6.130:8080";
 
 function getOptionsRequest(headers) {
-  const accessToken = selectors.auth.getAccessToken(store.getState())
   return {
     "Content-Type": "application/json",
-    "Authorization": accessToken,
     ...(headers || {})
   };
 }
