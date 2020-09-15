@@ -1,18 +1,15 @@
 import { checkIsServer } from "../src/utils/server";
 import withLayout from "../src/components/withLayout";
+import LoginScreen from "../src/components/Login/LoginScreen"
 
-function home() {
-  return <div>Home</div>
-}
-
-function Home(props = {}) {
+function LoginPage(props = {}) {
   const { pathname } = props;
-  return withLayout({ activedTab: "/category" })(home);
+  return <LoginScreen />;
 }
 
-Home.getInitialProps = async (ctx = {}) => {
+LoginPage.getInitialProps = async (ctx = {}) => {
   const { pathname } = ctx;
   return { pathname };
 };
 
-export default Home;
+export default LoginPage;

@@ -52,6 +52,7 @@ function PostIntroScreen(props) {
   const { activeModifyItem } = props;
 
   const [postIntros, setPostIntros] = useState();
+  const [isShowPostForm, setIsShowForm] = useState(false);
   const [updateAt, setUpdateAt] = useState();
   const [filter, setFilter] = useState(filterInit);
   const [isLoading, setLoading] = useState(false);
@@ -83,6 +84,7 @@ function PostIntroScreen(props) {
 
   const onEdit = useCallback((id) => {
     setPostIntroActive(id)
+    setIsShowForm(true)
   }, [1])
 
   const onClearFilter = useCallback(() => {
@@ -92,6 +94,15 @@ function PostIntroScreen(props) {
 
   const onCancelUpdate = useCallback(() => {
     setPostIntroActive()
+  }, [1])
+
+  const onCreateNew = () => {
+    setIsShowForm(true)
+  }
+
+  const onCancelPost = useCallback(() => {
+    setPostIntroActive("")
+    setIsShowForm(false)
   }, [1])
 
   return (
@@ -104,8 +115,10 @@ function PostIntroScreen(props) {
           onChangeFilter={onChangeFilter}
           onSubmit={onUpdateScreen}
           onClear={onClearFilter}
+          onNew={!isShowPostForm ? onCreateNew : isShowPostForm}
+          onCancel={isShowPostForm ? onCancelPost : isShowPostForm}
         />
-        <PostIntroTable
+        {!isShowPostForm && <PostIntroTable
           data={postIntros}
           isLoading={isLoading}
           onHideItem={() => { }}
@@ -114,16 +127,17 @@ function PostIntroScreen(props) {
           onUpdateScreen={onUpdateScreen}
           onEdit={onEdit}
           activeDropdown={activeDropdown}
-        />
+        />}
+        {isShowPostForm &&
+          <div style={{ marginTop: 15 }}>
+            <PostIntroForm
+              id={postIntroActive}
+              data={postIntroActiveData}
+              onCancel={onCancelPost}
+              onUpdateScreen={onUpdateScreen}
+            /></div>
+        }
       </WrapperTable>
-      <WrapperForm>
-        <PostIntroForm
-          id={postIntroActive}
-          data={postIntroActiveData}
-          onCancel={onCancelUpdate}
-          onUpdateScreen={onUpdateScreen}
-        />
-      </WrapperForm>
     </Container>
   );
 }

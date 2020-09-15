@@ -8,6 +8,7 @@ import { validateCategory } from "../../validate/validate";
 import AddImage from "../AddImage"
 import api from "../../api"
 import utils from "../../utils"
+import PostIntroEditer from "./PostIntroEditer"
 
 const Container = styled.div`
   display: flex;
@@ -32,7 +33,7 @@ const FormTitle = styled.div`
 const Label = styled.label`
   font-family: Arial !important;
   font-size: 14px !important;
-  font-weight: normal !important;
+  font-weight: 600 !important;
   color: #606266 !important;
 `;
 
@@ -139,36 +140,35 @@ function PostIntroForm(props) {
   const onClickUpdateItem = useCallback(() => {
     const postIntroNew = utils.convertPostIntro(postIntro)
     api.updatePostIntro(postIntroNew).then(() => {
+    })
+    setTimeout(() => {
+      onClickCancel()
       onUpdateScreen()
       onCancel()
-      setImage("");
-      setStoryMedia("");
-      setStoryMediaType("imageSrc");
-      setVideoIntroInput("")
-      setPostIntro(postIntroInit);
-      setIsDistinc(false);
-    })
-
+    }, 1000)
   }, [postIntro])
 
-  const onClickCreateItem = useCallback(() => {
+  const onClickCreateItem = () => {
     const postIntroNew = utils.convertPostIntro(postIntro)
     api.createPostIntro(postIntroNew).then(() => {
-      setPostIntro(postIntroInit);
-      setImage("");
-      setStoryMedia("");
-      setStoryMediaType("imageSrc");
-      setVideoIntroInput("")
-      onUpdateScreen();
     }).catch(console.log)
-    setIsDistinc(false);
-  }, [postIntro]);
+    setTimeout(() => {
+      onClickCancel()
+      onUpdateScreen()
+      onCancel()
+    }, 1000)
+  }
 
   const onChangeText = useCallback((e) => {
     const { name, value } = e.target;
     const postIntroNew = { ...postIntro, [name]: value };
     setPostIntro(postIntroNew);
   }, [postIntro])
+
+  const onChangeTextEditer = (value, name) => {
+    const postIntroNew = { ...postIntro, [name]: value };
+    setPostIntro(postIntroNew);
+  }
 
   const onChangeImageSrc = (e) => {
     const { value } = e.target || {}
@@ -242,13 +242,7 @@ function PostIntroForm(props) {
             Giới thiệu chung
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Giới thiệu chung"
-            value={intro || ""}
-            name="intro"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
+          <PostIntroEditer onChange={value => onChangeTextEditer(value, "intro")} content={intro} />
           <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
@@ -257,13 +251,7 @@ function PostIntroForm(props) {
             Câu chuyện ra đời
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Câu chuyện ra đời"
-            value={story || ""}
-            name="story"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
+          <PostIntroEditer onChange={value => onChangeTextEditer(value, "story")} content={story} />
           <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
@@ -303,13 +291,7 @@ function PostIntroForm(props) {
             Hướng dẫn sử dụng
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Hướng dẫn sử dụng"
-            value={userManual || ""}
-            name="userManual"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
+          <PostIntroEditer onChange={value => onChangeTextEditer(value, "userManual")} content={userManual} />
           <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
@@ -318,13 +300,8 @@ function PostIntroForm(props) {
             Chính sách bán hàng
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Hướng dẫn sử dụng"
-            value={policy || ""}
-            name="policy"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
+          <PostIntroEditer onChange={value => onChangeTextEditer(value, "policy")} content={policy} />
+
           <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
