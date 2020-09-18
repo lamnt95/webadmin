@@ -10,6 +10,7 @@ import { validateCategory } from "../../validate/validate";
 import AddImage from "../AddImage"
 import api from "../../api"
 import utils from "../../utils"
+import CategoryEditer from "./CategoryEditer"
 
 const Container = styled.div`
   display: flex;
@@ -34,7 +35,7 @@ const FormTitle = styled.div`
 const Label = styled.label`
   font-family: Arial !important;
   font-size: 14px !important;
-  font-weight: normal !important;
+  font-weight: 600 !important;
   color: #606266 !important;
 `;
 
@@ -146,29 +147,23 @@ function CategoriesForm(props) {
   const onClickUpdateItem = useCallback(() => {
     const categoryNew = utils.convertCategory(category)
     api.updateCategory(categoryNew).then(() => {
+    })
+    setTimeout(() => {
+      // onClickCancel()
       onUpdateScreen()
       onCancel()
-      setImage("");
-      setStoryMedia("");
-      setStoryMediaType("imageSrc");
-      setVideoIntroInput("")
-      setCategory(categoryInit);
-      setIsDistinc(false);
-    })
-
+    }, 1000)
   }, [category])
 
   const onClickCreateItem = useCallback(() => {
     const categoryNew = utils.convertCategory(category)
     api.createCategory(categoryNew).then(() => {
-      setCategory(categoryInit);
-      setImage("");
-      setStoryMedia("");
-      setStoryMediaType("imageSrc");
-      setVideoIntroInput("")
-      onUpdateScreen();
     }).catch(console.log)
-    setIsDistinc(false);
+    setTimeout(() => {
+      // onClickCancel()
+      onUpdateScreen()
+      onCancel()
+    }, 1000);
   }, [category]);
 
   const onChangeText = useCallback((e) => {
@@ -176,6 +171,12 @@ function CategoriesForm(props) {
     const categoryNew = { ...category, [name]: value };
     setCategory(categoryNew);
   }, [category])
+
+  const onChangeTextEditer = (value, name) => {
+    const categoryNew = { ...category, [name]: value };
+    setCategory(categoryNew);
+  }
+
 
   const onChangeImageSrc = (e) => {
     const { value } = e.target || {}
@@ -265,14 +266,7 @@ function CategoriesForm(props) {
             Giới thiệu về chuyên mục
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Giới thiệu về chuyên mục"
-            value={intro || ""}
-            name="intro"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
+          <CategoryEditer onChange={value => onChangeTextEditer(value, "intro")} content={intro} />
         </FormField>
 
         <FormField>
@@ -280,13 +274,7 @@ function CategoriesForm(props) {
             Câu chuyện ra đời của chuyên mục
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Câu chuyện ra đời của chuyên mục"
-            value={story || ""}
-            name="story"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
+          <CategoryEditer onChange={value => onChangeTextEditer(value, "story")} content={story} />
           <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
@@ -326,13 +314,7 @@ function CategoriesForm(props) {
             Hướng dẫn sử dụng của chuyên mục
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Hướng dẫn sử dụng của chuyên mục"
-            value={userManual || ""}
-            name="userManual"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
+          <CategoryEditer onChange={value => onChangeTextEditer(value, "userManual")} content={userManual} />
           <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
@@ -341,13 +323,7 @@ function CategoriesForm(props) {
             Chính sách bán hàng của chuyên mục
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Hướng dẫn sử dụng của chuyên mục"
-            value={policy || ""}
-            name="policy"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
+          <CategoryEditer onChange={value => onChangeTextEditer(value, "policy")} content={policy} />
           <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 

@@ -56,6 +56,7 @@ function CategoriesScreen(props) {
   const [filter, setFilter] = useState(filterInit);
   const [isLoading, setLoading] = useState(false);
   const [categoryActive, setCategoryActive] = useState();
+  const [isShowPostForm, setIsShowForm] = useState(false);
 
   const activeDropdown = _.get(filter, "activeDropdown")
 
@@ -75,11 +76,12 @@ function CategoriesScreen(props) {
 
   const onUpdateScreen = useCallback((res) => {
     setUpdateAt(new Date())
-  },[1])
+  }, [1])
 
   const onEditCategory = useCallback((id) => {
     setCategoryActive(id)
-  },[1])
+    setIsShowForm(true)
+  }, [1])
 
   const onClearFilter = useCallback(() => {
     setFilter(filterInit)
@@ -88,6 +90,17 @@ function CategoriesScreen(props) {
 
   const onCancelUpdate = useCallback(() => {
     setCategoryActive()
+    setIsShowForm(false)
+  }, [1])
+
+
+  const onCreateNew = () => {
+    setIsShowForm(true)
+  }
+
+  const onCancelPost = useCallback(() => {
+    setCategoryActive("")
+    setIsShowForm(false)
   }, [1])
 
   return (
@@ -100,8 +113,10 @@ function CategoriesScreen(props) {
           onChangeFilter={onChangeFilter}
           onSubmit={onUpdateScreen}
           onClear={onClearFilter}
+          onNew={!isShowPostForm ? onCreateNew : () => { }}
+          onCancel={isShowPostForm ? onCancelPost : () => { }}
         />
-        <CategoriesTable
+        {!isShowPostForm && <CategoriesTable
           data={categories}
           isLoading={isLoading}
           onHideItem={() => { }}
@@ -110,15 +125,15 @@ function CategoriesScreen(props) {
           onUpdateScreen={onUpdateScreen}
           onEditCategory={onEditCategory}
           activeDropdown={activeDropdown}
-        />
+        />}
+        {isShowPostForm && <div style={{ marginTop: 15 }}>
+          <CategoriesForm
+            id={categoryActive}
+            onCancel={onCancelUpdate}
+            onUpdateScreen={onUpdateScreen}
+          />
+        </div>}
       </WrapperTable>
-      <WrapperForm>
-        <CategoriesForm
-          id={categoryActive}
-          onCancel={onCancelUpdate}
-          onUpdateScreen={onUpdateScreen}
-        />
-      </WrapperForm>
     </Container>
   );
 }
