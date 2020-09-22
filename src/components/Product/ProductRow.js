@@ -28,12 +28,13 @@ function getAction(data) {
 
 function ProductRow(props) {
   const { data, onCheckProduct, onRejectProduct, onEditProduct, isActive, onDeleteProduct, activeDropdown } = props;
-  const { id, name, updatedDate, price } = data || {};
+  const { id, code, name, updatedDate, price } = data || {};
   const isDisable = false;
   const status = getStatus(data)
   const action = getAction(data)
   return (
     <TableRow isActive={isActive} isDisable={isDisable}>
+      <Cell width={50}>{code}</Cell>
       <Cell width={150}>{name}</Cell>
       <Cell>{price}</Cell>
       <Cell textAlign="center">{dateUtils.formatDate(updatedDate) || ""}</Cell>

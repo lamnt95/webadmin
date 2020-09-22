@@ -73,7 +73,10 @@ const FormButton = styled(Button)`
 `;
 
 function Filter(props) {
-  const { dropdownPlaceholder, optionsDropdown, onChangeFilter, activeDropdown, onClear, onSubmit, onNew, onCancel } = props || {};
+  const { dropdownPlaceholder, optionsDropdown, onChangeFilter, activeDropdown,
+    dropdownPlaceholder2, optionsDropdown2, onChangeFilter2, activeDropdown2,
+    onChangeSearch,
+    onClear, onSubmit, onNew, onCancel } = props || {};
   let inputKeyword = useRef(null);
 
   const handleClearFilter = () => {
@@ -82,7 +85,7 @@ function Filter(props) {
   };
 
   const onChangekeyword = (value, name) => {
-    onChangeFilter({ [name]: value });
+    onChangeSearch(value)
   };
 
   const onChangeDropdown = (e, data) => {
@@ -90,9 +93,14 @@ function Filter(props) {
     onChangeFilter({ activeDropdown: value });
   };
 
+  const onChangeDropdown2 = (e, data) => {
+    const { value } = data || {};
+    onChangeFilter2({ activeDropdown2: value });
+  };
+
   return (
     <Container>
-      <Dropdown
+      {optionsDropdown && <Dropdown
         style={styles.dropdown}
         placeholder={dropdownPlaceholder || "Chọn tiêu chí"}
         clearable
@@ -100,7 +108,16 @@ function Filter(props) {
         value={activeDropdown || ""}
         options={optionsDropdown}
         onChange={onChangeDropdown}
-      />
+      />}
+      {optionsDropdown2 && <Dropdown
+        style={styles.dropdown}
+        placeholder={dropdownPlaceholder2 || "Chọn tiêu chí"}
+        clearable
+        selection
+        value={activeDropdown2 || ""}
+        options={optionsDropdown2}
+        onChange={onChangeDropdown2}
+      />}
       <Input type="text" placeholder="Tìm theo từ khoá">
         <input
           style={styles.input}

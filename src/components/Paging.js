@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { Table, Menu, Icon } from "semantic-ui-react";
 
-function Paging(props: any) {
+function Paging(props) {
   const { onBack, onNext, total, current, onClickPaging } = props || {};
   if (total == 0 || !total) return null;
 

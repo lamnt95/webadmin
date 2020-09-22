@@ -5,6 +5,9 @@ import CategoriesTable from "./CategoriesTable";
 import CategoriesForm from "./CategoriesForm";
 import Filter from "../Filter"
 import api from "../../api"
+import { useSelector } from "react-redux"
+import axios from "axios"
+import { selectors } from "../../app-redux"
 
 const Container = styled.div`
   flex: 1;
@@ -59,14 +62,17 @@ function CategoriesScreen(props) {
   const [isShowPostForm, setIsShowForm] = useState(false);
 
   const activeDropdown = _.get(filter, "activeDropdown")
+  const accessToken = useSelector(selectors.auth.getAccessToken)
 
   useEffect(() => {
+    if (_.isEmpty(accessToken)) return;
+    axios.defaults.headers.common['Authorization'] = accessToken;
     setLoading(true)
     api.queryCategory({ checkedStatus: activeDropdown }).then(({ content }) => {
       setCategories(content)
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [updateAt])
+  }, [updateAt, accessToken])
 
   const onChangeFilter = useCallback((item) => {
     const newFilter = { ...filter, ...item }

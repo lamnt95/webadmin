@@ -5,6 +5,10 @@ import CartTable from "./CartTable";
 import CartForm from "./CartForm";
 import Filter from "../Filter"
 import api from "../../api"
+import Paging from "../Paging"
+import { useSelector } from "react-redux"
+import axios from "axios"
+import { selectors } from "../../app-redux"
 
 const Container = styled.div`
   flex: 1;
@@ -82,7 +86,10 @@ const filterInit = {
 
 function CartScreen(props) {
 
+  const accessToken = useSelector(selectors.auth.getAccessToken)
+
   const [isCreateOrder, setIsCreateOrder] = useState(false);
+  const [pageInfo, setPageInfo] = useState({});
   const [orders, setOrders] = useState();
   const [updateAt, setUpdateAt] = useState();
   const [filter, setFilter] = useState(filterInit);
@@ -93,12 +100,19 @@ function CartScreen(props) {
   const targetStatus = useMemo(() => _.get(optionsDropdownKeyBy, [activeDropdown, "next"]), [activeDropdown])
 
   useEffect(() => {
+    if (_.isEmpty(accessToken)) return;
+    axios.defaults.headers.common['Authorization'] = accessToken;
     setLoading(true)
-    api.queryOrder({ orderStatus: activeDropdown }).then(({ content }) => {
+    const { number: page } = pageInfo || {}
+    api.queryOrder({ orderStatus: activeDropdown, page }).then((res) => {
+      const { content, number, totalPages } = res || {}
       setOrders(content)
       setLoading(false)
+      if (page !== number) {
+        setPageInfo({ number, totalPages });
+      }
     }).catch(() => setLoading(false))
-  }, [updateAt])
+  }, [updateAt, pageInfo, accessToken])
 
   const onChangeFilter = useCallback((item) => {
     const newFilter = { ...filter, ...item }
@@ -129,6 +143,20 @@ function CartScreen(props) {
     setIsCreateOrder(true)
   }, [1])
 
+  const onBack = () => {
+    const number = (pageInfo.number - 1 < 0) ? 0 : pageInfo.number;
+    setPageInfo({ ...pageInfo, number })
+  }
+
+  const onNext = () => {
+    const number = (pageInfo.number + 1 > pageInfo.totalPages) ? pageInfo.totalPages : pageInfo.number;
+    setPageInfo({ ...pageInfo, number })
+  }
+
+  const onClickPaging = (number) => {
+    setPageInfo({ ...pageInfo, number })
+  }
+
   return (
     <Container>
       {!isCreateOrder && <WrapperTable>
@@ -149,7 +177,15 @@ function CartScreen(props) {
           onUpdateScreen={onUpdateScreen}
           onEditOrder={onEditOrder}
         />
-      </WrapperTable>}
+        <Paging
+          total={pageInfo.totalPages}
+          current={pageInfo.number}
+          onBack={onBack}
+          onNext={onNext}
+          onClickPaging={onClickPaging}
+        />
+      </WrapperTable>
+      }
       {isCreateOrder && <WrapperForm>
         <CartForm
           id={orderActive}

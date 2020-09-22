@@ -1,10 +1,14 @@
 import _, { valuesIn } from "lodash"
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import styled from "styled-components";
 import ProductTable from "./ProductTable";
 import ProductForm from "./ProductForm";
 import Filter from "../Filter"
 import api from "../../api"
+
+import { useSelector } from "react-redux"
+import axios from "axios"
+import { selectors } from "../../app-redux"
 
 const Container = styled.div`
   flex: 1;
@@ -45,7 +49,7 @@ const optionsDropdown = [
 ]
 
 const filterInit = {
-  activeDropdown: "APPROVE"
+  activeDropdown: "APPROVE",
 }
 
 function ProductScreen(props) {
@@ -58,15 +62,27 @@ function ProductScreen(props) {
   const [isLoading, setLoading] = useState(false);
   const [productActive, setProductActive] = useState();
 
+  const [categories, setCategories] = useState();
+  const categoriesDropdown = useMemo(() => {
+    return _.map(categories, (item = {}) => ({ key: item.id, value: item.id, text: item.name }))
+  }, [categories])
+
   const activeDropdown = _.get(filter, "activeDropdown")
+  const activeDropdown2 = _.get(filter, "activeDropdown2")
+  const productCode = _.get(filter, "productCode")
+  const accessToken = useSelector(selectors.auth.getAccessToken)
 
   useEffect(() => {
+    if (_.isEmpty(accessToken)) return;
+    axios.defaults.headers.common['Authorization'] = accessToken;
+    
     setLoading(true)
-    api.queryProduct({ checkedStatus: activeDropdown }).then(({ content }) => {
+    api.queryProduct({ checkedStatus: activeDropdown, categoryId: activeDropdown2, productCode }).then(({ content }) => {
       setProducts(content)
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [updateAt])
+    api.queryCategory({ size: 10000 }).then(({ content }) => setCategories(content));
+  }, [updateAt, accessToken])
 
   const onChangeFilter = useCallback((item) => {
     const newFilter = { ...filter, ...item }
@@ -97,6 +113,11 @@ function ProductScreen(props) {
     setIsCreateProduct(true)
   }, [1])
 
+  const onChangeSearch = (productCode) => {
+    const newFilter = { ...filter, productCode }
+    setFilter(newFilter)
+  }
+
   return (
     <Container>
       {!isCreateProduct && <WrapperTable>
@@ -105,6 +126,13 @@ function ProductScreen(props) {
           optionsDropdown={optionsDropdown}
           activeDropdown={activeDropdown}
           onChangeFilter={onChangeFilter}
+
+          dropdownPlaceholder2="Chuyên mục"
+          optionsDropdown2={categoriesDropdown}
+          activeDropdown2={activeDropdown2}
+          onChangeFilter2={onChangeFilter}
+
+          onChangeSearch={onChangeSearch}
           onSubmit={onUpdateScreen}
           onClear={onClearFilter}
           onNew={onCreateProduct}

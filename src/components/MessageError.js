@@ -11,7 +11,7 @@ const TextError = styled.div`
 
 function MessageError(props) {
   const { isShow, messages } = props || {};
-  return isShow ? _.map(messages, message => <TextError>{message}</TextError>) : null;
+  return (isShow || messages) ? _.map(messages, message => <TextError>{message}</TextError>) : null;
 }
 
 export default MessageError;

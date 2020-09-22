@@ -2,8 +2,8 @@ import _ from "lodash"
 import api from "./api"
 
 function queryProduct(params = {}) {
-  const { page = 0, size = 20, checkedStatus = "APPROVE" } = params;
-  const url = `/restaurant-cake-api/v1/admin/products?checkedStatus=${checkedStatus}&page=${page}&size=${size}`
+  const { page = 0, size = 20, checkedStatus = "APPROVE", categoryId = "", productCode = "" } = params;
+  const url = `/restaurant-cake-api/v1/admin/products?checkedStatus=${checkedStatus}&page=${page}&size=${size}&categoryId=${categoryId}&productCode=${productCode}`
   return api.get(url).then(({ data }) => data)
 }
 

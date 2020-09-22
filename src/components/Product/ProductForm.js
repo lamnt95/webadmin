@@ -10,6 +10,7 @@ import { validateProduct } from "../../validate/validate";
 import api from "../../api"
 import AddImage from "../AddImage"
 import utils from "../../utils"
+import ProductEditer from "./ProductEditer"
 
 const Container = styled.div`
   display: flex;
@@ -110,6 +111,7 @@ const productInit = {
 
 function ProductForm(props) {
   const [isDistinc, setIsDistinc] = useState(false);
+  const [messageError, setMessageError] = useState({});
   const [product, setProduct] = useState(productInit);
   const { categoryId } = product || {}
   const [categories, setCategories] = useState();
@@ -126,8 +128,6 @@ function ProductForm(props) {
   const subImages = _.get(product, "subImages") || [];
   const image = _.get(product, "image") || [];
   const title = isShowFormFix ? "Sửa sản phẩm" : "Thêm sản phẩm";
-  const messageError = validateProduct(product);
-  const { name: nameError, price: priceError, description: descriptionError, categoryId: categoryIdError } = messageError || {};
 
   useEffect(() => {
     api.queryCategory({ size: 10000 }).then(({ content }) => setCategories(content));
@@ -147,7 +147,12 @@ function ProductForm(props) {
     const { value } = data || {};
     const productNew = { ...product, categoryId: value };
     setProduct(productNew);
-  }, [product])
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateProduct(productNew) || {};
+      setMessageError(messageError)
+    }
+  }, [product, messageError])
 
   const onClickCancel = useCallback(() => {
     onCancel()
@@ -156,33 +161,60 @@ function ProductForm(props) {
   }, [1]);
 
   const onClickUpdateItem = useCallback(() => {
+    const messageError = validateProduct(product);
+    setMessageError(messageError)
+    if (!_.isEmpty(messageError)) return;
+
     const productNew = utils.convertProduct(product)
     api.updateProduct(productNew).then(() => {
+      
+    })
+
+    setTimeout(() => {
       onUpdateScreen()
       onCancel()
-      setProduct(productInit);
       setIsDistinc(false);
-    })
+    }, 1000);
 
   }, [product])
 
   const onClickCreateItem = useCallback(() => {
+    const messageError = validateProduct(product);
+    setMessageError(messageError)
+    if (!_.isEmpty(messageError)) return;
+
     const productNew = utils.convertProduct(product)
     api.createProduct(productNew).then(() => {
-      setProduct(productInit);
+
+    }).catch(console.log)
+
+    setTimeout(() => {
       onCancel()
       onUpdateScreen();
-    }).catch(console.log)
-    setIsDistinc(false);
+      setIsDistinc(false);
+    }, 1000);
   }, [product]);
+
+
+  const onChangeTextEditer = (value, name) => {
+    const productNew = { ...product, [name]: value };
+    setProduct(productNew);
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateProduct(productNew) || {};
+      setMessageError(messageError)
+    }
+  }
 
   const onChangeText = useCallback((e) => {
     const { name, value } = e.target;
     const productNew = { ...product, [name]: value };
     setProduct(productNew);
-  }, [product])
 
-
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateProduct(productNew) || {};
+      setMessageError(messageError)
+    }
+  }, [product, messageError])
 
   // sub images
 
@@ -201,6 +233,11 @@ function ProductForm(props) {
     const imagesNew = [...subImages, utils.addIdOneImage(subImage)];
     const productNew = { ...product, subImages: imagesNew };
     setProduct(productNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateProduct(productNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   // image
@@ -216,6 +253,11 @@ function ProductForm(props) {
   const onAddAvatarSrc = () => {
     const productNew = { ...product, image: [utils.addIdOneImage(avatar)] };
     setProduct(productNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateProduct(productNew) || {};
+      setMessageError(messageError)
+    }
   }
 
 
@@ -235,6 +277,8 @@ function ProductForm(props) {
             onFocus={() => setIsDistinc(true)}
           />
         </FormField>
+        <MessageError messages={_.get(messageError, "image") || {}} />
+
         <FormField>
           <AddImage
             title=" Ảnh phụ sản phẩm"
@@ -247,12 +291,14 @@ function ProductForm(props) {
             onFocus={() => setIsDistinc(true)}
           />
         </FormField>
+        <MessageError messages={_.get(messageError, "subImages") || {}} />
 
         <FormField>
           <Label>
             Chọn loại sản phẩm
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "categoryId") || {}} />
           <Dropdown
             style={styles.dropdown}
             placeholder="Chọn loại sản phẩm"
@@ -262,7 +308,6 @@ function ProductForm(props) {
             options={categoriesDropdown}
             onChange={onChangeDropdown}
           />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
@@ -270,6 +315,7 @@ function ProductForm(props) {
             Tên sản phẩm
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "name") || {}} />
           <Input
             placeholder={"Tên sản phẩm"}
             value={name || ""}
@@ -277,7 +323,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
@@ -285,14 +330,9 @@ function ProductForm(props) {
             Mô tả sản phẩm
             <TextWarning />
           </Label>
-          <Input
-            placeholder={"Nhập mô tả"}
-            value={description || ""}
-            name="description"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
-          <MessageError isShow={isDistinc && descriptionError} messages={descriptionError} />
+          <MessageError messages={_.get(messageError, "description") || {}} />
+          <ProductEditer onChange={value => onChangeTextEditer(value, "description")} content={description} />
+
         </FormField>
 
         <FormField>
@@ -300,6 +340,7 @@ function ProductForm(props) {
             Đơn vị sản phẩm
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "unit") || {}} />
           <Input
             placeholder={"Nhập đơn vị"}
             value={unit || ""}
@@ -307,7 +348,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && descriptionError} messages={descriptionError} />
         </FormField>
 
         <FormField>
@@ -315,6 +355,7 @@ function ProductForm(props) {
             Giá sản phẩm
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "price") || {}} />
           <Input
             type="number"
             placeholder={"Nhập giá sản phẩm"}
@@ -323,7 +364,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         {isShowFormFix ? (

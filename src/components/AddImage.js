@@ -28,7 +28,7 @@ const FormButton = styled(Button)`
   margin-right: ${(props) => `${props.right}px!important`};
 `;
 
-export default function AddImage({ title, onChange, onAdd, errors, images, onFocus, onRemove, value, btnTitle = "Thêm ảnh", errorText = "Không có ảnh nào", mapType }) {
+export default function AddImage({ title, onChange, onAdd, images, onFocus, onRemove, value, btnTitle = "Thêm ảnh", errorText = "Không có ảnh nào", mapType }) {
   return <>
     <Label>
       {title}
@@ -49,7 +49,6 @@ export default function AddImage({ title, onChange, onAdd, errors, images, onFoc
       color="#34c242"
       style={{ marginTop: 15 }}
       onClick={onAdd}
-      disabled={!_.isEmpty(errors)}
     >
       {btnTitle}
     </FormButton>

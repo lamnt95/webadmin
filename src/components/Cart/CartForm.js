@@ -6,7 +6,7 @@ import MessageError from "../MessageError";
 import UploadImage from "../UploadImage";
 import TextWarning from "../TextWarning";
 import CartFormProduct from "./CartFormProduct";
-import { validateProduct } from "../../validate/validate";
+import { validateCart } from "../../validate/validate";
 import api from "../../api"
 import provinceJSON from "../quanhuyen/tinh_tp.json"
 import districtJSON from "../quanhuyen/quan_huyen.json"
@@ -139,6 +139,7 @@ const DISTRIC_BADINH = "001"
 const DICTRIC_IN_HANOI = district[PROVINCE_HANOI]
 
 function ProductForm(props) {
+  const [messageError, setMessageError] = useState({});
   const [districtData, setDistricData] = useState(DICTRIC_IN_HANOI)
   const [products, setProducts] = useState();
   const productsKeyBy = useMemo(() => _.keyBy(products, "id"), [products]);
@@ -161,8 +162,8 @@ function ProductForm(props) {
 
   const isShowFormFix = !!id;
   const title = isShowFormFix ? "Sửa đơn hàng" : "Thêm đơn hàng";
-  const messageError = validateProduct(cart);
-  const { name: nameError, price: priceError, description: descriptionError, categoryId: categoryIdError } = messageError || {};
+
+  console.log("CART", cart)
 
   useEffect(() => {
     setDistricData(district[provinceCode])
@@ -197,30 +198,72 @@ function ProductForm(props) {
 
   const onAddProduct = useCallback(() => {
     const { productId, productQuantity } = product || {}
-    setCart({ ...cart, productDetailsView: [...productDetailsView, product], productDetails: [...productDetails, { productId, productQuantity }] });
-  }, [product, cart]);
+    const cartNew = { ...cart, productDetailsView: [...productDetailsView, product], productDetails: [...productDetails, { productId, productQuantity }] }
+    setCart(cartNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateCart(cartNew) || {};
+      setMessageError(messageError)
+    }
+  }, [product, cart, messageError]);
+
+  const onRemoveProduct = useCallback((productId) => {
+    const { productDetailsView, productDetails } = cart || {}
+    const productDetailsViewNew = _.filter(productDetailsView, i => i.productId != productId)
+    const productDetailsNew = _.filter(productDetails, i => i.productId != productId)
+    const cartNew = { ...cart, productDetailsView: productDetailsViewNew, productDetails: productDetailsNew }
+    setCart(cartNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateCart(cartNew) || {};
+      setMessageError(messageError)
+    }
+  }, [product, cart, messageError]);
 
   const onClickCreateItem = useCallback(() => {
+
+    const messageError = validateCart(cart) || {};
+    setMessageError(messageError)
+    if (!_.isEmpty(messageError)) return;
+
     const cartBody = convertCartStateToBody(cart)
     api.createOrder(cartBody).then(() => {
       onUpdateScreen()
       onCancel()
     });
-  }, [cart]);
+  }, [cart, messageError]);
 
   const onChangeText = useCallback((e) => {
     const { name, value } = e.target;
-    setCart({ ...cart, [name]: value });
-  }, [cart])
+    const cartNew = { ...cart, [name]: value }
+    setCart(cartNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateCart(cartNew) || {};
+      setMessageError(messageError)
+    }
+  }, [cart, messageError])
 
   const onChangeSex = useCallback((sex) => {
-    setCart({ ...cart, sex });
-  }, [cart])
+    const cartNew = { ...cart, sex }
+    setCart(cartNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateCart(cartNew) || {};
+      setMessageError(messageError)
+    }
+  }, [cart, messageError])
 
   const onChangeProvinceCode = (e, data) => {
     const { value } = data || {}
-    setCart({ ...cart, provinceCode: value });
+    const cartNew = { ...cart, provinceCode: value }
+    setCart(cartNew);
     setDistricData(district[value])
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validateCart(cartNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   return (
@@ -256,13 +299,11 @@ function ProductForm(props) {
             <FormButton
               color="#34c242"
               onClick={onAddProduct}
-              disabled={!_.isEmpty(messageError)}
             >
               Thêm sản phẩm
             </FormButton>
           </div>
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
-          {_.size(productDetailsView) > 0 && <CartFormProduct data={productDetailsView} />}
+          {_.size(productDetailsView) > 0 && <CartFormProduct data={productDetailsView} onRemove={onRemoveProduct} />}
         </FormField>
 
         <FormField>
@@ -277,7 +318,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
@@ -292,7 +332,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && descriptionError} messages={descriptionError} />
         </FormField>
         {/*  */}
         {totalCost && <FormField>
@@ -346,6 +385,7 @@ function ProductForm(props) {
             Họ tên khách hàng
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "fullName") || {}} />
           <Input
             placeholder="Nhập họ tên khách hàng"
             value={fullName || ""}
@@ -353,7 +393,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         <FormField>
@@ -361,6 +400,7 @@ function ProductForm(props) {
             Giới tính
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "sex") || {}} />
           <Form.Group inline>
             <Form.Radio
               label='Anh'
@@ -375,7 +415,6 @@ function ProductForm(props) {
               onChange={() => onChangeSex("FEMALE")}
             />
           </Form.Group>
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         <FormField>
@@ -383,6 +422,7 @@ function ProductForm(props) {
             Số điện thoại
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "phone") || {}} />
           <Input
             type="number"
             placeholder="Nhập số điện thoại"
@@ -391,7 +431,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         <FormField>
@@ -399,6 +438,7 @@ function ProductForm(props) {
             Email
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "email") || {}} />
           <Input
             type="email"
             placeholder="Nhập email"
@@ -407,7 +447,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         <FormField>
@@ -415,6 +454,7 @@ function ProductForm(props) {
             Tỉnh thành phố
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "provinceCode") || {}} />
           <Dropdown
             placeholder='Chọn tỉnh thành phố'
             fluid
@@ -423,7 +463,6 @@ function ProductForm(props) {
             options={provinceData}
             onChange={onChangeProvinceCode}
           />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         <FormField>
@@ -431,6 +470,7 @@ function ProductForm(props) {
             Quận huyện
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "districCode") || {}} />
           <Dropdown
             placeholder='Chọn quận huyện'
             fluid
@@ -441,7 +481,6 @@ function ProductForm(props) {
               setCart({ ...cart, districCode: value })
             }}
           />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         <FormField>
@@ -449,6 +488,7 @@ function ProductForm(props) {
             Địa chỉ
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "addressDetail") || {}} />
           <Input
             placeholder="Nhập địa chỉ"
             value={addressDetail || ""}
@@ -456,7 +496,6 @@ function ProductForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
         </FormField>
 
         <FormField>
@@ -464,14 +503,10 @@ function ProductForm(props) {
             Loại địa chỉ
             <TextWarning />
           </Label>
-          <Input
-            placeholder="Chọn loại địa chỉ"
-            value={addressType || ""}
-            name="addressType"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
-          <MessageError isShow={isDistinc && priceError} messages={priceError} />
+          <MessageError messages={_.get(messageError, "addressType") || {}} />
+          <Button primary={addressType === "COMPANY"} onClick={() => onChangeText({ target: { value: "COMPANY", name: "addressType" } })}>Công ty</Button>
+          <Button primary={addressType === "HOME"} onClick={() => onChangeText({ target: { value: "HOME", name: "addressType" } })}>Nhà riêng</Button>
+
         </FormField>
 
         {isShowFormFix ? (

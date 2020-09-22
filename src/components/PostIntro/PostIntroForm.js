@@ -4,7 +4,7 @@ import { Button, Form } from "semantic-ui-react";
 import styled from "styled-components";
 import MessageError from "../MessageError";
 import TextWarning from "../TextWarning";
-import { validateCategory } from "../../validate/validate";
+import { validatePostIntro } from "../../validate/validate";
 import AddImage from "../AddImage"
 import api from "../../api"
 import utils from "../../utils"
@@ -116,10 +116,9 @@ function PostIntroForm(props) {
   const { intro, story, userManual, policy, videoIntro } = postIntro || {};
   const images = _.get(postIntro, "images") || [];
   const storyMedias = _.get(postIntro, "storyMedias") || [];
+  const [messageError, setMessageError] = useState({});
 
   const title = isShowFormFix ? "Sửa giới thiệu chung" : "Thêm giới thiệu chung";
-  const messageError = validateCategory(postIntro);
-  const { name: nameError } = messageError || {};
 
   useEffect(() => {
     setPostIntro(utils.convertPostIntroForm(data));
@@ -138,6 +137,10 @@ function PostIntroForm(props) {
   }, [1]);
 
   const onClickUpdateItem = useCallback(() => {
+    const messageError = validatePostIntro(postIntro) || {};
+    setMessageError(messageError)
+    if (!_.isEmpty(messageError)) return;
+
     const postIntroNew = utils.convertPostIntro(postIntro)
     api.updatePostIntro(postIntroNew).then(() => {
     })
@@ -149,6 +152,10 @@ function PostIntroForm(props) {
   }, [postIntro])
 
   const onClickCreateItem = () => {
+    const messageError = validatePostIntro(postIntro) || {};
+    setMessageError(messageError)
+    if (!_.isEmpty(messageError)) return;
+
     const postIntroNew = utils.convertPostIntro(postIntro)
     api.createPostIntro(postIntroNew).then(() => {
     }).catch(console.log)
@@ -163,11 +170,21 @@ function PostIntroForm(props) {
     const { name, value } = e.target;
     const postIntroNew = { ...postIntro, [name]: value };
     setPostIntro(postIntroNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validatePostIntro(postIntroNew) || {};
+      setMessageError(messageError)
+    }
   }, [postIntro])
 
   const onChangeTextEditer = (value, name) => {
     const postIntroNew = { ...postIntro, [name]: value };
     setPostIntro(postIntroNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validatePostIntro(postIntroNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   const onChangeImageSrc = (e) => {
@@ -185,6 +202,11 @@ function PostIntroForm(props) {
     const imagesNew = [...images, utils.addIdOneImage(image)];
     const postIntroNew = { ...postIntro, images: imagesNew };
     setPostIntro(postIntroNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validatePostIntro(postIntroNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   const onChangeStoryMedia = (e) => {
@@ -196,12 +218,22 @@ function PostIntroForm(props) {
     const storyMediasNew = _.filter(storyMedias, i => i.id !== storyMediaId)
     const postIntroNew = { ...postIntro, storyMedias: storyMediasNew };
     setPostIntro(postIntroNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validatePostIntro(postIntroNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   const onAddStoryMedia = () => {
     const storyMediasNew = [...storyMedias, utils.addIdOneStoryMedia(storyMedia, storyMediaType)];
     const postIntroNew = { ...postIntro, storyMedias: storyMediasNew };
     setPostIntro(postIntroNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validatePostIntro(postIntroNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   const onChangeVideoIntro = (e) => {
@@ -212,11 +244,21 @@ function PostIntroForm(props) {
   const onRemoveVideoIntro = () => {
     const postIntroNew = { ...postIntro, videoIntro: undefined };
     setPostIntro(postIntroNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validatePostIntro(postIntroNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   const onAddVideoIntro = () => {
     const postIntroNew = { ...postIntro, videoIntro: videoIntroInput };
     setPostIntro(postIntroNew);
+
+    if (!_.isEmpty(messageError)) {
+      const messageError = validatePostIntro(postIntroNew) || {};
+      setMessageError(messageError)
+    }
   }
 
   return (
@@ -232,10 +274,10 @@ function PostIntroForm(props) {
             onChange={onChangeImageSrc}
             onRemove={onRemoveImageSrc}
             onAdd={onAddImageSrc}
-            errors={messageError}
             onFocus={() => setIsDistinc(true)}
           />
         </FormField>
+        <MessageError messages={_.get(messageError, "images") || {}} />
 
         <FormField>
           <Label>
@@ -243,8 +285,8 @@ function PostIntroForm(props) {
             <TextWarning />
           </Label>
           <PostIntroEditer onChange={value => onChangeTextEditer(value, "intro")} content={intro} />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
+        <MessageError messages={_.get(messageError, "intro") || {}} />
 
         <FormField>
           <Label>
@@ -252,11 +294,12 @@ function PostIntroForm(props) {
             <TextWarning />
           </Label>
           <PostIntroEditer onChange={value => onChangeTextEditer(value, "story")} content={story} />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
+        <MessageError messages={_.get(messageError, "story") || {}} />
 
         <FormField>
           <div>Loại Media</div>
+          <MessageError messages={_.get(messageError, "storyMedias") || {}} />
           <Form.Group inline>
             <Form.Radio
               label='Ảnh'
@@ -279,7 +322,6 @@ function PostIntroForm(props) {
             onChange={onChangeStoryMedia}
             onRemove={onRemoveStoryMedia}
             onAdd={onAddStoryMedia}
-            errors={messageError}
             onFocus={() => setIsDistinc(true)}
             btnTitle="Thêm ảnh hoặc video"
             errorText="Không có ảnh hoặc video nào"
@@ -291,8 +333,8 @@ function PostIntroForm(props) {
             Hướng dẫn sử dụng
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "userManual") || {}} />
           <PostIntroEditer onChange={value => onChangeTextEditer(value, "userManual")} content={userManual} />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
@@ -300,9 +342,9 @@ function PostIntroForm(props) {
             Chính sách bán hàng
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "policy") || {}} />
           <PostIntroEditer onChange={value => onChangeTextEditer(value, "policy")} content={policy} />
 
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
@@ -313,12 +355,12 @@ function PostIntroForm(props) {
             onChange={onChangeVideoIntro}
             onRemove={onRemoveVideoIntro}
             onAdd={onAddVideoIntro}
-            errors={messageError}
             onFocus={() => setIsDistinc(true)}
             btnTitle="Thêm video"
             errorText="Không có video nào"
           />
         </FormField>
+        <MessageError messages={_.get(messageError, "videoIntro") || {}} />
 
         {isShowFormFix ? (
           <GroupBtn>

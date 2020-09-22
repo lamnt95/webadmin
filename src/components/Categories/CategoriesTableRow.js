@@ -35,6 +35,7 @@ function CategoriesTableRow(props) {
   const publishStatus = publish ? "Xuất bản" : "Chưa xuất bản"
   return (
     <TableRow isActive={isActive} isDisable={isDisable}>
+      <Cell>{id}</Cell>
       <Cell>{name}</Cell>
       <Cell textAlign="center">{dateUtils.formatDate(updatedDate) || ""}</Cell>
       <Cell textAlign="center">{status}</Cell>

@@ -2,10 +2,14 @@ import _ from "lodash"
 import React, { useState, useEffect, useCallback } from "react"
 import styled from "styled-components";
 import PostTable from "./PostTable";
-import PostForm from "./PostForm";
 import PostFormEditer from "./PostFormEditer";
 import Filter from "../Filter"
 import api from "../../api"
+import Paging from "../Paging"
+
+import { useSelector } from "react-redux"
+import axios from "axios"
+import { selectors } from "../../app-redux"
 
 const Container = styled.div`
   flex: 1;
@@ -52,6 +56,7 @@ const filterInit = {
 function PostScreen(props) {
 
   const [post, setPost] = useState();
+  const [pageInfo, setPageInfo] = useState({});
   const [isShowPostForm, setIsShowForm] = useState(false);
   const [posts, setPosts] = useState();
   const [updateAt, setUpdateAt] = useState();
@@ -60,15 +65,22 @@ function PostScreen(props) {
   const [postActive, setPostActive] = useState();
 
   const activeDropdown = _.get(filter, "activeDropdown")
+  const accessToken = useSelector(selectors.auth.getAccessToken)
 
 
   useEffect(() => {
+    if (_.isEmpty(accessToken)) return;
+    axios.defaults.headers.common['Authorization'] = accessToken;
     setLoading(true)
-    api.queryPost({ checkedStatus: activeDropdown }).then(({ content }) => {
+    const { number: page } = pageInfo || {}
+    api.queryPost({ checkedStatus: activeDropdown, page }).then(({ content, number, totalPages }) => {
       setPosts(content)
       setLoading(false)
+      if (page !== number) {
+        setPageInfo({ number, totalPages });
+      }
     }).catch(() => setLoading(false))
-  }, [updateAt])
+  }, [updateAt, pageInfo,accessToken])
 
   const onChangePost = (postInput = {}) => {
     const newPost = { ...(post || {}), ...postInput }
@@ -123,6 +135,21 @@ function PostScreen(props) {
     })
   }
 
+  const onBack = () => {
+    const number = (pageInfo.number - 1 < 0) ? 0 : pageInfo.number;
+    setPageInfo({ ...pageInfo, number })
+  }
+
+  const onNext = () => {
+    const number = (pageInfo.number + 1 > pageInfo.totalPages) ? pageInfo.totalPages : pageInfo.number;
+    setPageInfo({ ...pageInfo, number })
+  }
+
+  const onClickPaging = (number) => {
+    setPageInfo({ ...pageInfo, number })
+  }
+
+
   return (
     <Container>
       <WrapperTable>
@@ -136,7 +163,7 @@ function PostScreen(props) {
           onNew={!isShowPostForm ? onCreateNew : isShowPostForm}
           onCancel={isShowPostForm ? onCancelPost : isShowPostForm}
         />
-        {!isShowPostForm && <PostTable
+        {!isShowPostForm && <><PostTable
           data={posts}
           isLoading={isLoading}
           onHideItem={() => { }}
@@ -145,7 +172,15 @@ function PostScreen(props) {
           onUpdateScreen={onUpdateScreen}
           onEdit={onEditPost}
           activeDropdown={activeDropdown}
-        />}
+        />
+          <Paging
+            total={pageInfo.totalPages}
+            current={pageInfo.number}
+            onBack={onBack}
+            onNext={onNext}
+            onClickPaging={onClickPaging}
+          />
+        </>}
         {isShowPostForm &&
           <div style={{ marginTop: 15 }}>
             <PostFormEditer

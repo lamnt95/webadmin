@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import _ from "lodash";
 import { Button, Form } from "semantic-ui-react";
 import styled from "styled-components";
-import MessageError from "../MessageError";
 import UploadImage from "../UploadImage";
 // import imageService from "../../services/imageService";
 import TextWarning from "../TextWarning";
@@ -11,6 +10,7 @@ import AddImage from "../AddImage"
 import api from "../../api"
 import utils from "../../utils"
 import CategoryEditer from "./CategoryEditer"
+import MessageError from "../MessageError"
 
 const Container = styled.div`
   display: flex;
@@ -108,6 +108,7 @@ function mapTypeMediaStory(type) {
 
 function CategoriesForm(props) {
   const [isDistinc, setIsDistinc] = useState(false);
+  const [messageError, setMessageError] = useState({});
   const [category, setCategory] = useState(categoryInit);
   const [image, setImage] = useState();
   const [storyMedia, setStoryMedia] = useState();
@@ -121,8 +122,6 @@ function CategoriesForm(props) {
   const storyMedias = _.get(category, "storyMedias") || [];
 
   const title = isShowFormFix ? "Sửa chuyên mục" : "Thêm chuyên mục";
-  const messageError = validateCategory(category);
-  const { name: nameError } = messageError || {};
 
   console.log("category", category)
 
@@ -145,6 +144,9 @@ function CategoriesForm(props) {
   }, [1]);
 
   const onClickUpdateItem = useCallback(() => {
+    const messageError = validateCategory(category) || {};
+    setMessageError(messageError)
+    if (!_.isEmpty(messageError)) return;
     const categoryNew = utils.convertCategory(category)
     api.updateCategory(categoryNew).then(() => {
     })
@@ -156,6 +158,9 @@ function CategoriesForm(props) {
   }, [category])
 
   const onClickCreateItem = useCallback(() => {
+    const messageError = validateCategory(category) || {};
+    setMessageError(messageError)
+    if (!_.isEmpty(messageError)) return;
     const categoryNew = utils.convertCategory(category)
     api.createCategory(categoryNew).then(() => {
     }).catch(console.log)
@@ -170,11 +175,19 @@ function CategoriesForm(props) {
     const { name, value } = e.target;
     const categoryNew = { ...category, [name]: value };
     setCategory(categoryNew);
-  }, [category])
+    if (!_.isEmpty(messageError)) {
+      const messageErrorNew = validateCategory(categoryNew) || {};
+      setMessageError(messageErrorNew)
+    }
+  }, [category, messageError])
 
   const onChangeTextEditer = (value, name) => {
     const categoryNew = { ...category, [name]: value };
     setCategory(categoryNew);
+    if (!_.isEmpty(messageError)) {
+      const messageErrorNew = validateCategory(categoryNew) || {};
+      setMessageError(messageErrorNew)
+    }
   }
 
 
@@ -193,6 +206,10 @@ function CategoriesForm(props) {
     const imagesNew = [...images, utils.addIdOneImage(image)];
     const categoryNew = { ...category, images: imagesNew };
     setCategory(categoryNew);
+    if (!_.isEmpty(messageError)) {
+      const messageErrorNew = validateCategory(categoryNew) || {};
+      setMessageError(messageErrorNew)
+    }
   }
 
   const onChangeStoryMedia = (e) => {
@@ -210,6 +227,10 @@ function CategoriesForm(props) {
     const storyMediasNew = [...storyMedias, utils.addIdOneStoryMedia(storyMedia, storyMediaType)];
     const categoryNew = { ...category, storyMedias: storyMediasNew };
     setCategory(categoryNew);
+    if (!_.isEmpty(messageError)) {
+      const messageErrorNew = validateCategory(categoryNew) || {};
+      setMessageError(messageErrorNew)
+    }
   }
 
   const onChangeVideoIntro = (e) => {
@@ -225,6 +246,10 @@ function CategoriesForm(props) {
   const onAddVideoIntro = () => {
     const categoryNew = { ...category, videoIntro: videoIntroInput };
     setCategory(categoryNew);
+    if (!_.isEmpty(messageError)) {
+      const messageErrorNew = validateCategory(categoryNew) || {};
+      setMessageError(messageErrorNew)
+    }
   }
 
   return (
@@ -240,9 +265,9 @@ function CategoriesForm(props) {
             onChange={onChangeImageSrc}
             onRemove={onRemoveImageSrc}
             onAdd={onAddImageSrc}
-            errors={messageError}
             onFocus={() => setIsDistinc(true)}
           />
+          <MessageError messages={_.get(messageError, "images") || {}} />
         </FormField>
 
         <FormField>
@@ -250,6 +275,7 @@ function CategoriesForm(props) {
             Tên chuyên mục
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "name") || {}} />
           <Input
             placeholder={"Tên chuyên mục"}
             value={name || ""}
@@ -257,7 +283,6 @@ function CategoriesForm(props) {
             onInput={onChangeText}
             onFocus={() => setIsDistinc(true)}
           />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
 
@@ -266,6 +291,7 @@ function CategoriesForm(props) {
             Giới thiệu về chuyên mục
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "intro") || {}} />
           <CategoryEditer onChange={value => onChangeTextEditer(value, "intro")} content={intro} />
         </FormField>
 
@@ -274,12 +300,13 @@ function CategoriesForm(props) {
             Câu chuyện ra đời của chuyên mục
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "story") || {}} />
           <CategoryEditer onChange={value => onChangeTextEditer(value, "story")} content={story} />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
           <div>Loại Media</div>
+          <MessageError messages={_.get(messageError, "storyMedias") || {}} />
           <Form.Group inline>
             <Form.Radio
               label='Ảnh'
@@ -302,7 +329,6 @@ function CategoriesForm(props) {
             onChange={onChangeStoryMedia}
             onRemove={onRemoveStoryMedia}
             onAdd={onAddStoryMedia}
-            errors={messageError}
             onFocus={() => setIsDistinc(true)}
             btnTitle="Thêm ảnh hoặc video"
             errorText="Không có ảnh hoặc video nào"
@@ -314,8 +340,8 @@ function CategoriesForm(props) {
             Hướng dẫn sử dụng của chuyên mục
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "userManual") || {}} />
           <CategoryEditer onChange={value => onChangeTextEditer(value, "userManual")} content={userManual} />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
@@ -323,8 +349,8 @@ function CategoriesForm(props) {
             Chính sách bán hàng của chuyên mục
             <TextWarning />
           </Label>
+          <MessageError messages={_.get(messageError, "policy") || {}} />
           <CategoryEditer onChange={value => onChangeTextEditer(value, "policy")} content={policy} />
-          <MessageError isShow={isDistinc && nameError} messages={nameError} />
         </FormField>
 
         <FormField>
@@ -335,12 +361,12 @@ function CategoriesForm(props) {
             onChange={onChangeVideoIntro}
             onRemove={onRemoveVideoIntro}
             onAdd={onAddVideoIntro}
-            errors={messageError}
             onFocus={() => setIsDistinc(true)}
             btnTitle="Thêm video"
             errorText="Không có video nào"
           />
         </FormField>
+        <MessageError messages={_.get(messageError, "videoIntro") || {}} />
 
         {isShowFormFix ? (
           <GroupBtn>

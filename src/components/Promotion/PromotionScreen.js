@@ -6,6 +6,10 @@ import PromotionForm from "./PromotionForm";
 import Filter from "../Filter"
 import api from "../../api"
 
+import { useSelector } from "react-redux"
+import axios from "axios"
+import { selectors } from "../../app-redux"
+
 const Container = styled.div`
   flex: 1;
   display: flex;
@@ -59,14 +63,18 @@ function ProductScreen(props) {
   const [productActive, setProductActive] = useState();
 
   const activeDropdown = _.get(filter, "activeDropdown")
+  const accessToken = useSelector(selectors.auth.getAccessToken)
 
   useEffect(() => {
+    if (_.isEmpty(accessToken)) return;
+    axios.defaults.headers.common['Authorization'] = accessToken;
+
     setLoading(true)
     api.queryPromotions({ checkedStatus: activeDropdown }).then(({ content }) => {
       setProducts(content)
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [updateAt])
+  }, [updateAt, accessToken])
 
   const onChangeFilter = useCallback((item) => {
     const newFilter = { ...filter, ...item }

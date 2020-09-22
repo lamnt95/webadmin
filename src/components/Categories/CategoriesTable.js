@@ -39,6 +39,7 @@ function CategoriesTable(props) {
     <WrapperTable>
       <Table.Header>
         <Table.Row>
+          <Header>Mã</Header>
           <Header>Tên</Header>
           <Header textAlign="center" width={180}>
             Ngày cập nhật

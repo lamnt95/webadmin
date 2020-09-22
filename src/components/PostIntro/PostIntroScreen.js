@@ -6,6 +6,10 @@ import PostIntroForm from "./PostIntroForm";
 import Filter from "../Filter"
 import api from "../../api"
 
+import { useSelector } from "react-redux"
+import axios from "axios"
+import { selectors } from "../../app-redux"
+
 const Container = styled.div`
   flex: 1;
   display: flex;
@@ -61,16 +65,19 @@ function PostIntroScreen(props) {
   const postIntroActiveData = _.head(_.filter(postIntros, i => i.id === postIntroActive) || []) || {};
 
   const activeDropdown = _.get(filter, "activeDropdown")
+  const accessToken = useSelector(selectors.auth.getAccessToken)
 
   console.log("postIntros", postIntros)
 
   useEffect(() => {
+    if (_.isEmpty(accessToken)) return;
+    axios.defaults.headers.common['Authorization'] = accessToken;
     setLoading(true)
     api.queryPostIntro({ checkedStatus: activeDropdown }).then(({ content }) => {
       setPostIntros(content)
       setLoading(false)
     }).catch(() => setLoading(false))
-  }, [updateAt])
+  }, [updateAt, accessToken])
 
   const onChangeFilter = useCallback((item) => {
     const newFilter = { ...filter, ...item }
