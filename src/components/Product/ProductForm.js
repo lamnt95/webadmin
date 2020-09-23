@@ -124,7 +124,7 @@ function ProductForm(props) {
 
   const { id, onUpdateScreen, onCancel } = props;
   const isShowFormFix = !!id;
-  const { name, price, description, unit } = product || {};
+  const { name, price, description, unit, summary } = product || {};
   const subImages = _.get(product, "subImages") || [];
   const image = _.get(product, "image") || [];
   const title = isShowFormFix ? "Sửa sản phẩm" : "Thêm sản phẩm";
@@ -207,7 +207,11 @@ function ProductForm(props) {
 
   const onChangeText = useCallback((e) => {
     const { name, value } = e.target;
-    const productNew = { ...product, [name]: value };
+    let valueInput = value;
+    if(name==="price"){
+      valueInput = _.parseInt(valueInput);
+    }
+    const productNew = { ...product, [name]: valueInput };
     setProduct(productNew);
 
     if (!_.isEmpty(messageError)) {
@@ -332,7 +336,15 @@ function ProductForm(props) {
           </Label>
           <MessageError messages={_.get(messageError, "description") || {}} />
           <ProductEditer onChange={value => onChangeTextEditer(value, "description")} content={description} />
+        </FormField>
 
+        <FormField>
+          <Label>
+            Tổng quan sản phẩm
+            <TextWarning />
+          </Label>
+          <MessageError messages={_.get(messageError, "summary") || {}} />
+          <ProductEditer onChange={value => onChangeTextEditer(value, "summary")} content={summary} />
         </FormField>
 
         <FormField>

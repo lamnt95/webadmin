@@ -64,9 +64,10 @@ export const productConfig = [
   { field: 'description', empty: true },
   { field: 'image', empty: true },
   { field: 'name', empty: true },
-  { field: 'price', empty: true },
+  { field: 'price', emptyNumber: true },
   { field: 'subImages', empty: true },
   { field: 'unit', empty: true },
+  { field: 'summary', empty: true },
 ];
 
 export function validateProduct(data = {}, responseError = []) {
