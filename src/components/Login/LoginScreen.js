@@ -51,10 +51,10 @@ export default function LoginScreen() {
           <label>Mật khẩu</label>
           <input placeholder='Mật khẩu' onChange={e => setPassword(e.target.value)} type="password"/>
         </Form.Field>
-        <Form.Field>
+        {/* <Form.Field>
           <label>Nhập token (dành cho khi test đăng nhập)</label>
           <input placeholder='Nhập token' onChange={e => setAccesstoken(e.target.value)} />
-        </Form.Field>
+        </Form.Field> */}
         <Button onClick={onSubmit}>Submit</Button>
       </Form>
     </Wrapper>
