@@ -124,13 +124,13 @@ function convertCartStateToBody(cart) {
 }
 
 function orderToCartState(order, products) {
-  const { coupon, receivedDate, productDetails, userInfoOrder, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus } = order || {};
+  const { coupon, receivedDate, productDetails, userInfoOrder, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus, valueCoupon, valuePayment, orderStatus } = order || {};
   const { email, fullName, phone, sex, address } = userInfoOrder || {}
   const { addressDetail, addressType, provinceCode, districCode } = address || {}
   const productsKeyBy = _.keyBy(products, "id")
   const productDetailsConverted = _.map(productDetails, ({ productId, productQuantity }) => ({ productId, productQuantity }))
-  const productDetailsView = _.map(productDetails, ({ productId, productQuantity }) => ({ productId, productQuantity, productName: _.get(productsKeyBy, [productId, "name"]) }))
-  const cart = { coupon, receivedDate, email, fullName, phone, addressDetail, addressType, productDetails: productDetailsConverted, productDetailsView, sex, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus };
+  const productDetailsView = _.map(productDetails, ({ productId, productQuantity, price, priceAfterPromotion, totalCost, totalCostAfterPromotion, totalRatePromotion }) => ({ totalRatePromotion, totalCost, totalCostAfterPromotion, productId, productQuantity, price, priceAfterPromotion, productName: _.get(productsKeyBy, [productId, "name"]) }))
+  const cart = {orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, productDetails: productDetailsConverted, productDetailsView, sex, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus };
   return cart;
 }
 
@@ -147,7 +147,7 @@ function ProductForm(props) {
   const productDetailsView = _.get(cart, "productDetailsView") || []
   const productDetails = _.get(cart, "productDetails") || []
   const sex = _.get(cart, "sex") || "MALE"
-  const { coupon, receivedDate, email, fullName, phone, addressDetail, addressType, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus } = cart || {};
+  const {orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus } = cart || {};
   console.log("cart", cart)
   const [product, setProduct] = useState();
   const [isDistinc, setIsDistinc] = useState(false);
@@ -336,7 +336,7 @@ function ProductForm(props) {
         {/*  */}
         {totalCost && <FormField>
           <Label>
-            Tổng giá trị đơn hàng
+            Tổng thành tiền
           <TextWarning />
           </Label>
           <Input
@@ -345,9 +345,31 @@ function ProductForm(props) {
           />
         </FormField>}
 
+        {totalCostAfterPromotion && <FormField>
+          <Label>
+            Tổng thành tiền sau chiết khấu
+          <TextWarning />
+          </Label>
+          <Input
+            disabled
+            value={totalCostAfterPromotion || ""}
+          />
+        </FormField>}
+
+        {totalCost && <FormField>
+          <Label>
+            Tổng chiết khấu
+          <TextWarning />
+          </Label>
+          <Input
+            disabled
+            value={totalCost - totalCostAfterPromotion || "0"}
+          />
+        </FormField>}
+
         {totalRatePromotion && <FormField>
           <Label>
-            Chiết khấu
+            Tổng % chiết khấu
           <TextWarning />
           </Label>
           <Input
@@ -356,14 +378,38 @@ function ProductForm(props) {
           />
         </FormField>}
 
-        {totalCostAfterPromotion && <FormField>
+
+        {valueCoupon && <FormField>
           <Label>
-            Tổng giá trị đơn hàng sau khuyến mại
+            Khuyến mại theo coupon
           <TextWarning />
           </Label>
           <Input
             disabled
-            value={totalCostAfterPromotion || ""}
+            value={valueCoupon || ""}
+          />
+        </FormField>}
+
+
+        {valuePayment && <FormField>
+          <Label>
+            Tổng thanh toán
+          <TextWarning />
+          </Label>
+          <Input
+            disabled
+            value={valuePayment || ""}
+          />
+        </FormField>}
+
+        {orderStatus && <FormField>
+          <Label>
+            Trạng thái đơn hàng
+          <TextWarning />
+          </Label>
+          <Input
+            disabled
+            value={orderStatus || ""}
           />
         </FormField>}
 
