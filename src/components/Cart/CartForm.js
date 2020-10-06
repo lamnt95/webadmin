@@ -107,6 +107,7 @@ const styles = {
 const cartInit = {
   coupon: undefined,
   sex: "MALE",
+  payment: "CASH",
 };
 
 function convertCartStateToBody(cart) {
@@ -124,13 +125,13 @@ function convertCartStateToBody(cart) {
 }
 
 function orderToCartState(order, products) {
-  const { coupon, receivedDate, productDetails, userInfoOrder, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus, valueCoupon, valuePayment, orderStatus } = order || {};
+  const { coupon, receivedDate, productDetails, userInfoOrder, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus, valueCoupon, valuePayment, orderStatus, payment } = order || {};
   const { email, fullName, phone, sex, address } = userInfoOrder || {}
   const { addressDetail, addressType, provinceCode, districCode } = address || {}
   const productsKeyBy = _.keyBy(products, "id")
   const productDetailsConverted = _.map(productDetails, ({ productId, productQuantity }) => ({ productId, productQuantity }))
   const productDetailsView = _.map(productDetails, ({ productId, productQuantity, price, priceAfterPromotion, totalCost, totalCostAfterPromotion, totalRatePromotion }) => ({ totalRatePromotion, totalCost, totalCostAfterPromotion, productId, productQuantity, price, priceAfterPromotion, productName: _.get(productsKeyBy, [productId, "name"]) }))
-  const cart = {orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, productDetails: productDetailsConverted, productDetailsView, sex, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus };
+  const cart = { payment, orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, productDetails: productDetailsConverted, productDetailsView, sex, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus };
   return cart;
 }
 
@@ -147,7 +148,7 @@ function ProductForm(props) {
   const productDetailsView = _.get(cart, "productDetailsView") || []
   const productDetails = _.get(cart, "productDetails") || []
   const sex = _.get(cart, "sex") || "MALE"
-  const {orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus } = cart || {};
+  const { payment, orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus } = cart || {};
   console.log("cart", cart)
   const [product, setProduct] = useState();
   const [isDistinc, setIsDistinc] = useState(false);
@@ -422,6 +423,17 @@ function ProductForm(props) {
             disabled
             value={paidStatus || ""}
           />
+        </FormField>}
+
+        {payment && <FormField>
+          <Label>
+            Hình thức thanh toán
+            <TextWarning />
+          </Label>
+          <MessageError messages={_.get(messageError, "payment") || {}} />
+          <Button primary={payment === "CASH"} onClick={() => onChangeText({ target: { value: "CASH", name: "payment" } })}>Tiền mặt</Button>
+          <Button primary={payment === "ONLINE"} onClick={() => onChangeText({ target: { value: "ONLINE", name: "payment" } })}>Chuyển khoản</Button>
+
         </FormField>}
 
 

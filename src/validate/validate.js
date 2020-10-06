@@ -99,6 +99,7 @@ export const cartConfig = [
   { field: 'fullName', empty: true },
   { field: 'phone', empty: true },
   { field: 'sex', empty: true },
+  { field: 'payment', empty: true },
 ];
 
 export function validateCart(data = {}, responseError = []) {
