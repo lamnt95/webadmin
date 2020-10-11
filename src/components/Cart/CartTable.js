@@ -36,18 +36,15 @@ function CartTable(props) {
       <Table.Header>
         <Table.Row>
           <Header>Mã đơn hàng</Header>
-          <Header>Tổng số tiền sau khuyến mại</Header>
+          <Header>Tên khách hàng</Header>
+          <Header textAlign="center">Tổng thanh toán</Header>
+          <Header textAlign="center">Ngày nhận hàng</Header>
+          <Header textAlign="center">Ngày hoàn tất đơn hàng</Header>
           <Header textAlign="center" width={180}>
             Ngày cập nhật
           </Header>
           <Header textAlign="center" width={100}>
-            Trạng thái
-          </Header>
-          <Header textAlign="center" width={100}>
-            Thanh toán
-          </Header>
-          <Header textAlign="center" width={250}>
-            Đổi trạng thái thanh toán
+            Trạng thái Thanh toán
           </Header>
           <Header textAlign="center" width={100}>
             Hành động

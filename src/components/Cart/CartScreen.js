@@ -95,6 +95,7 @@ function CartScreen(props) {
   const [filter, setFilter] = useState(filterInit);
   const [isLoading, setLoading] = useState(false);
   const [orderActive, setOrderActive] = useState();
+  console.log("orderActive",orderActive)
 
   const activeDropdown = _.get(filter, "activeDropdown")
   const targetStatus = useMemo(() => _.get(optionsDropdownKeyBy, [activeDropdown, "next"]), [activeDropdown])
@@ -125,6 +126,7 @@ function CartScreen(props) {
   }, [1])
 
   const onEditOrder = useCallback((id) => {
+    console.log("setOrderActive",id)
     setOrderActive(id)
     setIsCreateOrder(true)
   }, [1])
@@ -167,7 +169,7 @@ function CartScreen(props) {
           onChangeFilter={onChangeFilter}
           onSubmit={onUpdateScreen}
           onClear={onClearFilter}
-          onNew={onCreateProduct}
+          // onNew={onCreateProduct}
         />
         <CartTable
           data={orders}
@@ -190,7 +192,6 @@ function CartScreen(props) {
         <CartForm
           id={orderActive}
           onCancel={onCancelUpdate}
-          onUpdateScreen={onUpdateScreen}
         />
       </WrapperForm>}
     </Container>

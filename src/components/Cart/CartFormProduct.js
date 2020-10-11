@@ -1,10 +1,10 @@
 import _ from "lodash"
 import React from "react"
 import { Icon, Label, Menu, Table } from 'semantic-ui-react'
+import utils from "../../utils"
 
 export default function CartFormProduct(props) {
-  const { data, onRemove } = props;
-  console.log("data", data)
+  const { data, productsKeyBy } = props;
   if (_.isEmpty(data)) return null;
   return <Table celled>
     <Table.Header>
@@ -17,27 +17,20 @@ export default function CartFormProduct(props) {
         <Table.HeaderCell>Thành tiền</Table.HeaderCell>
         <Table.HeaderCell>Thành tiền sau chiết khấu</Table.HeaderCell>
         <Table.HeaderCell>Chiết khấu</Table.HeaderCell>
-        <Table.HeaderCell>Phần trăm chiết khấu</Table.HeaderCell>
-        <Table.HeaderCell>Thao tác</Table.HeaderCell>
       </Table.Row>
     </Table.Header>
 
     <Table.Body>
-      {_.map(data, item => <Table.Row key={item.productId}>
-        <Table.Cell>{item.productId}</Table.Cell>
-        <Table.Cell>{item.productName}</Table.Cell>
-        <Table.Cell>{item.productQuantity}</Table.Cell>
-        <Table.Cell>{item.price}</Table.Cell>
-        <Table.Cell>{item.priceAfterPromotion}</Table.Cell>
-        <Table.Cell>{item.totalCost}</Table.Cell>
-        <Table.Cell>{item.totalCostAfterPromotion}</Table.Cell>
-        <Table.Cell>{item.totalCost - item.totalCostAfterPromotion}</Table.Cell>
-        <Table.Cell>{item.totalRatePromotion}</Table.Cell>
-        <Table.Cell>
-          <button onClick={() => onRemove(item.productId)}>
-            Xoá
-          </button>
-        </Table.Cell>
+      {_.map(data, item => <Table.Row key={item.code}>
+        <Table.Cell>{_.get(productsKeyBy, [item.productId, "code"])}</Table.Cell>
+        <Table.Cell>{_.get(productsKeyBy, [item.productId, "name"])}</Table.Cell>
+        <Table.Cell>{utils.formatMoney(item.productQuantity)}</Table.Cell>
+        <Table.Cell>{utils.formatMoney(_.get(productsKeyBy, [item.productId, "price"]))}</Table.Cell>
+        <Table.Cell>{utils.formatMoney(_.get(productsKeyBy, [item.productId, "priceAfterPromotion"]))}</Table.Cell>
+        <Table.Cell>{utils.formatMoney(_.get(productsKeyBy, [item.productId, "totalCost"]) || (item.productQuantity * _.get(productsKeyBy, [item.productId, "price"])))}</Table.Cell>
+        <Table.Cell>{utils.formatMoney(_.get(productsKeyBy, [item.productId, "totalCostAfterPromotion"]) || (item.productQuantity * _.get(productsKeyBy, [item.productId, "priceAfterPromotion"])))}</Table.Cell>
+        <Table.Cell>{utils.formatMoney((_.get(productsKeyBy, [item.productId, "totalCost"]) - _.get(productsKeyBy, [item.productId, "totalCostAfterPromotion"]))
+          || (item.productQuantity * _.get(productsKeyBy, [item.productId, "price"]) - item.productQuantity * _.get(productsKeyBy, [item.productId, "priceAfterPromotion"])))}</Table.Cell>
       </Table.Row>)}
     </Table.Body>
   </Table>

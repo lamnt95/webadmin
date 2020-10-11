@@ -1,15 +1,13 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import _ from "lodash";
 import { Button, Form, Dropdown } from "semantic-ui-react";
 import styled from "styled-components";
-import MessageError from "../MessageError";
-import UploadImage from "../UploadImage";
 import TextWarning from "../TextWarning";
 import CartFormProduct from "./CartFormProduct";
-import { validateCart } from "../../validate/validate";
 import api from "../../api"
 import provinceJSON from "../quanhuyen/tinh_tp.json"
 import districtJSON from "../quanhuyen/quan_huyen.json"
+import utils from "../../utils"
 
 const provinceData = _.values(provinceJSON);
 
@@ -110,20 +108,6 @@ const cartInit = {
   payment: "CASH",
 };
 
-function convertCartStateToBody(cart) {
-  const { coupon, receivedDate, email, fullName, phone, addressDetail, addressType, productDetails, sex } = cart || {};
-  const cartBody = {
-    coupon, productDetails, receivedDate,
-    userInfoOrder: {
-      email, fullName, phone, sex,
-      address: {
-        addressDetail, addressType
-      }
-    }
-  }
-  return cartBody
-}
-
 function orderToCartState(order, products) {
   const { coupon, receivedDate, productDetails, userInfoOrder, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus, valueCoupon, valuePayment, orderStatus, payment } = order || {};
   const { email, fullName, phone, sex, address } = userInfoOrder || {}
@@ -140,7 +124,6 @@ const DISTRIC_BADINH = "001"
 const DICTRIC_IN_HANOI = district[PROVINCE_HANOI]
 
 function ProductForm(props) {
-  const [messageError, setMessageError] = useState({});
   const [districtData, setDistricData] = useState(DICTRIC_IN_HANOI)
   const [products, setProducts] = useState();
   const productsKeyBy = useMemo(() => _.keyBy(products, "id"), [products]);
@@ -149,22 +132,12 @@ function ProductForm(props) {
   const productDetails = _.get(cart, "productDetails") || []
   const sex = _.get(cart, "sex") || "MALE"
   const { payment, orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus } = cart || {};
-  console.log("cart", cart)
   const [product, setProduct] = useState();
-  const [isDistinc, setIsDistinc] = useState(false);
-  const productId = _.get(product, "productId")
-  const productQuantity = _.get(product, "productQuantity")
 
-  const productsDropdown = useMemo(() => {
-    return _.map(products, (item = {}) => ({ key: item.id, value: item.id, text: item.name }))
-  }, [products])
+  const { id, onCancel } = props;
 
-  const { id, onUpdateScreen, onCancel } = props;
+  const title = "Xem đơn hàng";
 
-  const isShowFormFix = !!id;
-  const title = isShowFormFix ? "Sửa đơn hàng" : "Thêm đơn hàng";
-
-  console.log("CART", cart)
 
   useEffect(() => {
     setDistricData(district[provinceCode])
@@ -178,94 +151,16 @@ function ProductForm(props) {
           const cart = orderToCartState(order, products);
           setCart(cart)
         })
+      } else {
+        const cartNew = orderToCartState(cart, products);
+        setCart(cartNew)
       }
     });
 
   }, [id])
-
-  const onChangeProductQuantity = useCallback((productQuantity) => {
-    setProduct({ ...product, productQuantity: _.parseInt(productQuantity) });
-  }, [product])
-
-  const onChangeDropdown = useCallback((e, data) => {
-    const { value } = data || {};
-    const productName = _.get(productsKeyBy, [value, "name"]) || ""
-    setProduct({ ...product, productId: value, productName });
-  }, [product, productsKeyBy])
-
   const onClickCancel = useCallback(() => {
     onCancel()
   }, [1]);
-
-  const onAddProduct = useCallback(() => {
-    const { productId, productQuantity } = product || {}
-    const cartNew = { ...cart, productDetailsView: [...productDetailsView, product], productDetails: [...productDetails, { productId, productQuantity }] }
-    setCart(cartNew);
-
-    if (!_.isEmpty(messageError)) {
-      const messageError = validateCart(cartNew) || {};
-      setMessageError(messageError)
-    }
-  }, [product, cart, messageError]);
-
-  const onRemoveProduct = useCallback((productId) => {
-    const { productDetailsView, productDetails } = cart || {}
-    const productDetailsViewNew = _.filter(productDetailsView, i => i.productId != productId)
-    const productDetailsNew = _.filter(productDetails, i => i.productId != productId)
-    const cartNew = { ...cart, productDetailsView: productDetailsViewNew, productDetails: productDetailsNew }
-    setCart(cartNew);
-
-    if (!_.isEmpty(messageError)) {
-      const messageError = validateCart(cartNew) || {};
-      setMessageError(messageError)
-    }
-  }, [product, cart, messageError]);
-
-  const onClickCreateItem = useCallback(() => {
-
-    const messageError = validateCart(cart) || {};
-    setMessageError(messageError)
-    if (!_.isEmpty(messageError)) return;
-
-    const cartBody = convertCartStateToBody(cart)
-    api.createOrder(cartBody).then(() => {
-      onUpdateScreen()
-      onCancel()
-    });
-  }, [cart, messageError]);
-
-  const onChangeText = useCallback((e) => {
-    const { name, value } = e.target;
-    const cartNew = { ...cart, [name]: value }
-    setCart(cartNew);
-
-    if (!_.isEmpty(messageError)) {
-      const messageError = validateCart(cartNew) || {};
-      setMessageError(messageError)
-    }
-  }, [cart, messageError])
-
-  const onChangeSex = useCallback((sex) => {
-    const cartNew = { ...cart, sex }
-    setCart(cartNew);
-
-    if (!_.isEmpty(messageError)) {
-      const messageError = validateCart(cartNew) || {};
-      setMessageError(messageError)
-    }
-  }, [cart, messageError])
-
-  const onChangeProvinceCode = (e, data) => {
-    const { value } = data || {}
-    const cartNew = { ...cart, provinceCode: value }
-    setCart(cartNew);
-    setDistricData(district[value])
-
-    if (!_.isEmpty(messageError)) {
-      const messageError = validateCart(cartNew) || {};
-      setMessageError(messageError)
-    }
-  }
 
   return (
     <Container>
@@ -276,65 +171,9 @@ function ProductForm(props) {
             Sản phẩm
             <TextWarning />
           </Label>
-          <div style={{ flexDirection: "row", display: "flex" }}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholder="Chọn sản phẩm"
-              clearable
-              selection
-              value={productId || ""}
-              options={productsDropdown}
-              onChange={onChangeDropdown}
-            />
-            <Input
-              left={20}
-              right={20}
-              width={200}
-              placeholder={"Nhập số lượng"}
-              value={productQuantity || ""}
-              name="productQuantity"
-              onInput={(e) => onChangeProductQuantity(e.target.value)}
-              type="number"
-              onFocus={() => setIsDistinc(true)}
-            />
-            <FormButton
-              color="#34c242"
-              onClick={onAddProduct}
-            >
-              Thêm sản phẩm
-            </FormButton>
-          </div>
-          {_.size(productDetailsView) > 0 && <CartFormProduct data={productDetailsView} onRemove={onRemoveProduct} />}
+          {_.size(productDetailsView) > 0 && <CartFormProduct data={productDetailsView} productsKeyBy={productsKeyBy} />}
         </FormField>
 
-        <FormField>
-          <Label>
-            Mã giảm giá
-            <TextWarning />
-          </Label>
-          <Input
-            placeholder={"Nhập mã giảm giá"}
-            value={coupon || ""}
-            name="coupon"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
-        </FormField>
-
-        <FormField>
-          <Label>
-            Ngày nhận hàng
-            <TextWarning />
-          </Label>
-          <Input
-            placeholder="Chọn ngày nhận hàng"
-            value={receivedDate || ""}
-            name="receivedDate"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
-          />
-        </FormField>
-        {/*  */}
         {totalCost && <FormField>
           <Label>
             Tổng thành tiền
@@ -342,7 +181,7 @@ function ProductForm(props) {
           </Label>
           <Input
             disabled
-            value={totalCost || ""}
+            value={utils.formatMoney(totalCost) || ""}
           />
         </FormField>}
 
@@ -353,7 +192,7 @@ function ProductForm(props) {
           </Label>
           <Input
             disabled
-            value={totalCostAfterPromotion || ""}
+            value={utils.formatMoney(totalCostAfterPromotion) || ""}
           />
         </FormField>}
 
@@ -364,20 +203,34 @@ function ProductForm(props) {
           </Label>
           <Input
             disabled
-            value={totalCost - totalCostAfterPromotion || "0"}
+            value={utils.formatMoney(totalCost - totalCostAfterPromotion) || "0"}
           />
         </FormField>}
 
-        {totalRatePromotion && <FormField>
+        {!_.isNull(totalRatePromotion) && <FormField>
           <Label>
             Tổng % chiết khấu
           <TextWarning />
           </Label>
           <Input
             disabled
-            value={totalRatePromotion || ""}
+            value={utils.formatMoney(totalRatePromotion)}
           />
         </FormField>}
+
+
+        <FormField>
+          <Label>
+            Mã giảm giá
+            <TextWarning />
+          </Label>
+          <Input
+            placeholder={"Nhập mã giảm giá"}
+            value={coupon || ""}
+            name="coupon"
+            disabled
+          />
+        </FormField>
 
 
         {valueCoupon && <FormField>
@@ -387,10 +240,9 @@ function ProductForm(props) {
           </Label>
           <Input
             disabled
-            value={valueCoupon || ""}
+            value={utils.formatMoney(valueCoupon) || ""}
           />
         </FormField>}
-
 
         {valuePayment && <FormField>
           <Label>
@@ -402,6 +254,20 @@ function ProductForm(props) {
             value={valuePayment || ""}
           />
         </FormField>}
+
+        <FormField>
+          <Label>
+            Ngày nhận hàng
+            <TextWarning />
+          </Label>
+          <Input
+            placeholder="Chọn ngày nhận hàng"
+            value={receivedDate || ""}
+            name="receivedDate"
+            disabled
+          />
+        </FormField>
+        {/*  */}
 
         {orderStatus && <FormField>
           <Label>
@@ -430,9 +296,8 @@ function ProductForm(props) {
             Hình thức thanh toán
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "payment") || {}} />
-          <Button primary={payment === "CASH"} onClick={() => onChangeText({ target: { value: "CASH", name: "payment" } })}>Tiền mặt</Button>
-          <Button primary={payment === "ONLINE"} onClick={() => onChangeText({ target: { value: "ONLINE", name: "payment" } })}>Chuyển khoản</Button>
+          <Button primary={payment === "CASH"} disabled>Tiền mặt</Button>
+          <Button primary={payment === "ONLINE"} disabled>Chuyển khoản</Button>
 
         </FormField>}
 
@@ -443,13 +308,11 @@ function ProductForm(props) {
             Họ tên khách hàng
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "fullName") || {}} />
           <Input
             placeholder="Nhập họ tên khách hàng"
             value={fullName || ""}
             name="fullName"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
+            disabled
           />
         </FormField>
 
@@ -458,19 +321,18 @@ function ProductForm(props) {
             Giới tính
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "sex") || {}} />
           <Form.Group inline>
             <Form.Radio
               label='Anh'
               value='MALE'
               checked={sex === 'MALE'}
-              onChange={() => onChangeSex("MALE")}
+              disabled
             />
             <Form.Radio
               label='Chị'
               value='FEMALE'
+              disabled
               checked={sex === 'FEMALE'}
-              onChange={() => onChangeSex("FEMALE")}
             />
           </Form.Group>
         </FormField>
@@ -480,14 +342,12 @@ function ProductForm(props) {
             Số điện thoại
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "phone") || {}} />
           <Input
             type="number"
             placeholder="Nhập số điện thoại"
             value={phone || ""}
+            disabled
             name="phone"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
           />
         </FormField>
 
@@ -496,14 +356,12 @@ function ProductForm(props) {
             Email
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "email") || {}} />
           <Input
             type="email"
             placeholder="Nhập email"
             value={email || ""}
+            disabled
             name="email"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
           />
         </FormField>
 
@@ -512,14 +370,13 @@ function ProductForm(props) {
             Tỉnh thành phố
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "provinceCode") || {}} />
           <Dropdown
             placeholder='Chọn tỉnh thành phố'
             fluid
             selection
             value={provinceCode}
+            disabled
             options={provinceData}
-            onChange={onChangeProvinceCode}
           />
         </FormField>
 
@@ -528,16 +385,13 @@ function ProductForm(props) {
             Quận huyện
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "districCode") || {}} />
           <Dropdown
             placeholder='Chọn quận huyện'
             fluid
+            disabled
             value={districCode}
             selection
             options={districtData}
-            onChange={(e, { value }) => {
-              setCart({ ...cart, districCode: value })
-            }}
           />
         </FormField>
 
@@ -546,13 +400,11 @@ function ProductForm(props) {
             Địa chỉ
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "addressDetail") || {}} />
           <Input
             placeholder="Nhập địa chỉ"
             value={addressDetail || ""}
             name="addressDetail"
-            onInput={onChangeText}
-            onFocus={() => setIsDistinc(true)}
+            disabled
           />
         </FormField>
 
@@ -561,13 +413,10 @@ function ProductForm(props) {
             Loại địa chỉ
             <TextWarning />
           </Label>
-          <MessageError messages={_.get(messageError, "addressType") || {}} />
-          <Button primary={addressType === "COMPANY"} onClick={() => onChangeText({ target: { value: "COMPANY", name: "addressType" } })}>Công ty</Button>
-          <Button primary={addressType === "HOME"} onClick={() => onChangeText({ target: { value: "HOME", name: "addressType" } })}>Nhà riêng</Button>
+          <Button primary={addressType === "COMPANY"} disabled>Công ty</Button>
+          <Button primary={addressType === "HOME"} disabled>Nhà riêng</Button>
 
         </FormField>
-
-        {isShowFormFix ? (
           <GroupBtn>
             <WrapperBtn>
               <FormButton color="#676561" right={24} onClick={onClickCancel}>
@@ -575,24 +424,6 @@ function ProductForm(props) {
               </FormButton>
             </WrapperBtn>
           </GroupBtn>
-        ) : (
-            <GroupBtn>
-              <WrapperBtn>
-                <FormButton color="#676561" right={24} onClick={onClickCancel}>
-                  Huỷ
-              </FormButton>
-              </WrapperBtn>
-              <WrapperBtn>
-                <FormButton
-                  color="#34c242"
-                  onClick={onClickCreateItem}
-                  disabled={!_.isEmpty(messageError)}
-                >
-                  Thêm mới
-            </FormButton>
-              </WrapperBtn>
-            </GroupBtn>
-          )}
       </FormContainer>
     </Container>
   );

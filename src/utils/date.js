@@ -4,8 +4,8 @@ export function toUnix(date, format = "YYYY-MM-DD") {
   return moment(date, format).unix();
 }
 
-function formatDate(timeUTC) {
-  const createdDate = moment.utc(timeUTC).local().format("DD/MM/YYYY");
+function formatDate(timeUTC, msg = "") {
+  const createdDate = moment.utc(timeUTC).local().format("DD/MM/YYYY") || msg;
   const createdDateString = `${createdDate}`;
   return createdDateString;
 }

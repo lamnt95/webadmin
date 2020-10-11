@@ -5,6 +5,7 @@ import RowManipulation from "../RowManipulation";
 import dateUtils from "../../utils/date";
 import { Dropdown, Button } from 'semantic-ui-react'
 import api from "../../api"
+import utils from "../../utils";
 
 const PAID_TEXT = {
   UNPAID: "Chưa thanh toán",
@@ -45,8 +46,8 @@ function getStatus(data) {
 }
 
 function ProductRow(props) {
-  const { data, onCheckOrder, onRejectOrder, onEditOrder, isActive, onDeleteOrder,onUpdateScreen } = props;
-  const { id, code, updatedDate, totalCostAfterPromotion, paidStatus } = data || {};
+  const { data, onCheckOrder, onRejectOrder, onEditOrder, isActive, onDeleteOrder, onUpdateScreen } = props;
+  const { id, code, updatedDate, totalCostAfterPromotion, paidStatus, userInfoOrder, receivedDate, dateFinish } = data || {};
   const isDisable = false;
   const status = getStatus(data)
   const [paidStatusTemp, setPaidStatusTemp] = useState();
@@ -56,11 +57,13 @@ function ProductRow(props) {
   return (
     <TableRow isActive={isActive} isDisable={isDisable}>
       <Cell width={150}>{code}</Cell>
-      <Cell>{totalCostAfterPromotion}</Cell>
-      <Cell textAlign="center">{dateUtils.formatDate(updatedDate) || ""}</Cell>
-      <Cell textAlign="center">{status}</Cell>
-      <Cell textAlign="center">{PAID_TEXT[paidStatus] || ""}</Cell>
-      <Cell>
+      <Cell>{userInfoOrder.fullName}</Cell>
+      <Cell textAlign="center" width={200}>{utils.formatMoney(totalCostAfterPromotion) || ""}</Cell>
+      <Cell textAlign="center" width={150}>{dateUtils.formatDate(receivedDate) || ""}</Cell>
+      <Cell textAlign="center" width={200}>{dateFinish && dateUtils.formatDate(dateFinish) || "Chưa hoàn tất"}</Cell>
+      <Cell textAlign="center" width={150}>{dateUtils.formatDate(updatedDate) || ""}</Cell>
+      <Cell textAlign="center" width={200}>{PAID_TEXT[paidStatus] || ""}</Cell>
+      {/* <Cell>
         <div style={{ display: "flex", flexDirection: "row" }} >
           <Dropdown
             placeholder='Select Friend'
@@ -72,16 +75,16 @@ function ProductRow(props) {
           />
           <Button onClick={() => api.changeOrderPaidStatus(id, paidStatusTemp).then(onUpdateScreen)}>Đổi</Button>
         </div>
-      </Cell>
+      </Cell> */}
       <Cell width={200}>
         <RowManipulation
           id={id}
           isDisable={isDisable}
           isActive={isActive}
           isShowEdit
-          isShowReject
-          isShowDelete
-          isShowApprove
+          // isShowReject
+          isShowDelete={PAID_TEXT[paidStatus] === "CANCEL"}
+          // isShowApprove
           isShowDropdown
           onApprove={onCheckOrder}
           onReject={onRejectOrder}
