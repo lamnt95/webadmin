@@ -2,6 +2,7 @@ import _ from "lodash";
 import React, { useContext, useRef } from "react";
 import styled from "styled-components";
 import { Button, Input, Dropdown } from "semantic-ui-react";
+import CartInfoCalendar from "./CartInfoCalendar"
 
 const Container = styled.div`
   display: flex;
@@ -72,12 +73,25 @@ const FormButton = styled(Button)`
   }
 `;
 
+
+
 function Filter(props) {
   const { dropdownPlaceholder, optionsDropdown, onChangeFilter, activeDropdown,
     dropdownPlaceholder2, optionsDropdown2, onChangeFilter2, activeDropdown2,
     onChangeSearch,
-    onClear, onSubmit, onNew, onCancel } = props || {};
+    onClear, onSubmit, onNew, onCancel, isShowReceivedDate, onChangeReceiveDate, receivedDate,
+    
+    isShowFromDateFinish,
+    fromDateFinish,
+    onChangeFromDateFinish,
+
+    isShowToDateFinish,
+    toDateFinish,
+    onChangeToDateFinish
+  
+  } = props || {};
   let inputKeyword = useRef(null);
+
 
   const handleClearFilter = () => {
     inputKeyword.value = "";
@@ -95,64 +109,72 @@ function Filter(props) {
 
   const onChangeDropdown2 = (e, data) => {
     const { value } = data || {};
-    onChangeFilter2({ activeDropdown2: value });
+    onChangeFilter2({ activeDropdown: value });
   };
 
   return (
-    <Container>
-      {optionsDropdown && <Dropdown
-        style={styles.dropdown}
-        placeholder={dropdownPlaceholder || "Chọn tiêu chí"}
-        clearable
-        selection
-        value={activeDropdown || ""}
-        options={optionsDropdown}
-        onChange={onChangeDropdown}
-      />}
-      {optionsDropdown2 && <Dropdown
-        style={styles.dropdown}
-        placeholder={dropdownPlaceholder2 || "Chọn tiêu chí"}
-        clearable
-        selection
-        value={activeDropdown2 || ""}
-        options={optionsDropdown2}
-        onChange={onChangeDropdown2}
-      />}
-      <Input type="text" placeholder="Tìm theo từ khoá">
-        <input
-          style={styles.input}
-          name="keyword"
-          onChange={(e) => onChangekeyword(e.target.value, "keyword")}
-          ref={(element) => (inputKeyword = element)}
-        />
-      </Input>
-      <ButtonSearchContainer
-        onClick={() => {
-          onSubmit();
-        }}
-        left={10}
-      >
-        <ButtonSearchTitle>Tìm kiếm</ButtonSearchTitle>
-      </ButtonSearchContainer>
-      <FormButton
-        color="#a2adb5"
-        onClick={handleClearFilter}
-      >
-        Xoá lọc
+    <>
+      <Container>
+        {optionsDropdown && <Dropdown
+          style={styles.dropdown}
+          placeholder={dropdownPlaceholder || "Chọn tiêu chí"}
+          clearable
+          selection
+          value={activeDropdown || ""}
+          options={optionsDropdown}
+          onChange={onChangeDropdown}
+        />}
+        {optionsDropdown2 && <Dropdown
+          style={styles.dropdown}
+          placeholder={dropdownPlaceholder2 || "Chọn tiêu chí"}
+          clearable
+          selection
+          value={activeDropdown2 || ""}
+          options={optionsDropdown2}
+          onChange={onChangeDropdown2}
+        />}
+        <Input type="text" placeholder="Tìm theo từ khoá">
+          <input
+            style={styles.input}
+            name="keyword"
+            onChange={(e) => onChangekeyword(e.target.value, "keyword")}
+            ref={(element) => (inputKeyword = element)}
+          />
+        </Input>
+        {isShowReceivedDate && <div style={{ marginLeft: "10px" }}><CartInfoCalendar msg="Chọn ngày nhận hàng" date={receivedDate} onChange={onChangeReceiveDate} /></div>}
+        <ButtonSearchContainer
+          onClick={() => {
+            onSubmit();
+          }}
+          left={10}
+        >
+          <ButtonSearchTitle>Tìm kiếm</ButtonSearchTitle>
+        </ButtonSearchContainer>
+        <FormButton
+          color="#a2adb5"
+          onClick={handleClearFilter}
+        >
+          Xoá lọc
       </FormButton>
-      {_.isFunction(onNew) && <FormButton
-        color="green"
-        onClick={onNew}
-      >
-        Tạo mới
+        {_.isFunction(onNew) && <FormButton
+          color="green"
+          onClick={onNew}
+        >
+          Tạo mới
       </FormButton>}
-      {_.isFunction(onCancel) && <FormButton
-        color="gray"
-        onClick={onCancel}
-      >
-        Huỷ
+        {_.isFunction(onCancel) && <FormButton
+          color="gray"
+          onClick={onCancel}
+        >
+          Huỷ
       </FormButton>}
-    </Container>
+
+      </Container>
+      <Container style={{marginTop:"10px"}}>
+        {isShowFromDateFinish && <div><CartInfoCalendar msg="Chọn ngày bắt đầu" date={fromDateFinish} onChange={onChangeFromDateFinish} /></div>}
+        {isShowToDateFinish && <div style={{ marginLeft: "10px" }}><CartInfoCalendar msg="Chọn ngày kết thúc" date={toDateFinish} onChange={onChangeToDateFinish} /></div>}
+      </Container>
+    </>
   );
 }
 

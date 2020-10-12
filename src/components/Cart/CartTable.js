@@ -8,7 +8,7 @@ import api from "../../api"
 
 function CartTable(props) {
 
-  const { data, isLoading, onUpdateScreen, onEditOrder, activeItem, targetStatus } = props;
+  const { data, isLoading, onUpdateScreen, onEditOrder, activeItem } = props;
 
 
   if (isLoading)
@@ -18,14 +18,6 @@ function CartTable(props) {
       </WrapperTable>
     );
   if (_.isEmpty(data)) return null;
-
-  const onCheckOrder = useCallback((id) => {
-    api.checkOrder(id, targetStatus).then(onUpdateScreen)
-  }, [targetStatus])
-
-  const onRejectOrder = useCallback((id) => {
-    api.checkOrder(id, "FAILURE_DELIVERY").then(onUpdateScreen)
-  }, [1])
 
   const onDeleteOrder = useCallback((id) => {
     api.checkOrder(id, "CANCEL").then(onUpdateScreen)
@@ -47,6 +39,9 @@ function CartTable(props) {
             Trạng thái Thanh toán
           </Header>
           <Header textAlign="center" width={100}>
+            Trạng thái đơn hàng
+          </Header>
+          <Header textAlign="center" width={100}>
             Hành động
           </Header>
         </Table.Row>
@@ -55,8 +50,6 @@ function CartTable(props) {
         {_.map(data, (item, index) => (
           <CartRow index={index + 1} key={item.id} data={item}
             isActive={activeItem === item.id}
-            onCheckOrder={onCheckOrder}
-            onRejectOrder={onRejectOrder}
             onEditOrder={onEditOrder}
             onDeleteOrder={onDeleteOrder}
             onUpdateScreen={onUpdateScreen}

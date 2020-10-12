@@ -9,6 +9,7 @@ import Paging from "../Paging"
 import { useSelector } from "react-redux"
 import axios from "axios"
 import { selectors } from "../../app-redux"
+import utils from "../../utils";
 
 const Container = styled.div`
   flex: 1;
@@ -29,6 +30,32 @@ const WrapperTable = styled.div`
 const WrapperForm = styled.div`
   flex: 30;
 `;
+
+
+const PAID_TEXT = {
+  UNPAID: "Chưa thanh toán",
+  FULL_PAID: "Đã thanh toán",
+  PARTIALLY_PAID: "Thanh toán một phần",
+}
+
+
+const paidDropdown = [
+  {
+    key: 'UNPAID',
+    value: 'UNPAID',
+    text: PAID_TEXT.UNPAID,
+  },
+  {
+    key: 'FULL_PAID',
+    value: 'FULL_PAID',
+    text: PAID_TEXT.FULL_PAID,
+  },
+  {
+    key: 'PARTIALLY_PAID',
+    value: 'PARTIALLY_PAID',
+    text: PAID_TEXT.PARTIALLY_PAID,
+  }
+]
 
 const optionsDropdown = [
   {
@@ -84,6 +111,13 @@ const filterInit = {
   activeDropdown: "NEW"
 }
 
+
+const filterInit2 = {
+  activeDropdown: "UNPAID"
+}
+
+
+
 function CartScreen(props) {
 
   const accessToken = useSelector(selectors.auth.getAccessToken)
@@ -93,19 +127,28 @@ function CartScreen(props) {
   const [orders, setOrders] = useState();
   const [updateAt, setUpdateAt] = useState();
   const [filter, setFilter] = useState(filterInit);
+  const [filter2, setFilter2] = useState(filterInit2);
+  const [receivedDate, setReceivedDate] = useState(null)
+  const [fromDateFinish, setFromDateFinish] = useState(null)
+  const [toDateFinish, setToDateFinish] = useState(null)
+
+  console.log("receivedDate", receivedDate)
   const [isLoading, setLoading] = useState(false);
   const [orderActive, setOrderActive] = useState();
-  console.log("orderActive",orderActive)
 
   const activeDropdown = _.get(filter, "activeDropdown")
-  const targetStatus = useMemo(() => _.get(optionsDropdownKeyBy, [activeDropdown, "next"]), [activeDropdown])
+  const activeDropdown2 = _.get(filter2, "activeDropdown")
 
   useEffect(() => {
     if (_.isEmpty(accessToken)) return;
     axios.defaults.headers.common['Authorization'] = accessToken;
     setLoading(true)
     const { number: page } = pageInfo || {}
-    api.queryOrder({ orderStatus: activeDropdown, page }).then((res) => {
+    api.queryOrder({ orderStatus: activeDropdown, paidStatus: activeDropdown2, page, 
+      fromReceivedDate: receivedDate != null ? utils.formatYYYMMDD(receivedDate) : "" ,
+      fromDateFinish: fromDateFinish != null ? utils.formatYYYMMDD(fromDateFinish) : "" ,
+      toDateFinish: toDateFinish != null ? utils.formatYYYMMDD(toDateFinish) : "" 
+    }).then((res) => {
       const { content, number, totalPages } = res || {}
       setOrders(content)
       setLoading(false)
@@ -121,12 +164,17 @@ function CartScreen(props) {
     onUpdateScreen()
   }, [filter])
 
+  const onChangeFilter2 = useCallback((item) => {
+    const newFilter = { ...filter2, ...item }
+    setFilter2(newFilter)
+    onUpdateScreen()
+  }, [filter2])
+
   const onUpdateScreen = useCallback((res) => {
     setUpdateAt(new Date())
   }, [1])
 
   const onEditOrder = useCallback((id) => {
-    console.log("setOrderActive",id)
     setOrderActive(id)
     setIsCreateOrder(true)
   }, [1])
@@ -139,10 +187,6 @@ function CartScreen(props) {
   const onCancelUpdate = useCallback(() => {
     setOrderActive()
     setIsCreateOrder(false)
-  }, [1])
-
-  const onCreateProduct = useCallback(() => {
-    setIsCreateOrder(true)
   }, [1])
 
   const onBack = () => {
@@ -165,17 +209,41 @@ function CartScreen(props) {
         <Filter
           dropdownPlaceholder="Trạng thái"
           optionsDropdown={optionsDropdown}
+          optionsDropdown2={paidDropdown}
           activeDropdown={activeDropdown}
+          activeDropdown2={activeDropdown2}
+
           onChangeFilter={onChangeFilter}
+          onChangeFilter2={onChangeFilter2}
+
           onSubmit={onUpdateScreen}
           onClear={onClearFilter}
-          // onNew={onCreateProduct}
+
+          isShowReceivedDate
+          receivedDate={receivedDate}
+          onChangeReceiveDate={(date) => {
+            setReceivedDate(date);
+            onUpdateScreen()
+          }}
+
+          isShowFromDateFinish
+          fromDateFinish={fromDateFinish}
+          onChangeFromDateFinish={(date) => {
+            setFromDateFinish(date);
+            onUpdateScreen()
+          }}
+
+          isShowToDateFinish
+          toDateFinish={toDateFinish}
+          onChangeToDateFinish={(date) => {
+            setToDateFinish(date);
+            onUpdateScreen()
+          }}
         />
         <CartTable
           data={orders}
           isLoading={isLoading}
           activeItem={orderActive}
-          targetStatus={targetStatus}
           onUpdateScreen={onUpdateScreen}
           onEditOrder={onEditOrder}
         />
@@ -192,6 +260,7 @@ function CartScreen(props) {
         <CartForm
           id={orderActive}
           onCancel={onCancelUpdate}
+          onUpdateScreen={onUpdateScreen}
         />
       </WrapperForm>}
     </Container>

@@ -8,6 +8,7 @@ import api from "../../api"
 import provinceJSON from "../quanhuyen/tinh_tp.json"
 import districtJSON from "../quanhuyen/quan_huyen.json"
 import utils from "../../utils"
+import { toast } from 'react-toastify';
 
 const provinceData = _.values(provinceJSON);
 
@@ -108,13 +109,94 @@ const cartInit = {
   payment: "CASH",
 };
 
+
+const PAID_TEXT = {
+  UNPAID: "Chưa thanh toán",
+  FULL_PAID: "Đã thanh toán",
+  PARTIALLY_PAID: "Thanh toán một phần",
+}
+
+
+const ORDER_TEXT = {
+  NEW: "Mới",
+  CUSTOMER_APPROVE: "Khách hàng đã duyệt",
+  PRODUCE_APPROVE: "Nhà sản xuất đã duyệt",
+  READY_DELIVERY: "Sẵn sàng giao hàng",
+  DELIVERY: "Đang giao hàng",
+  FINISH: "Hoàn thành",
+  FAILURE_DELIVERY: "Giao hàng thất bại",
+  CANCEL: "Hủy"
+}
+
+const orderDropdown = [
+  {
+    key: 'NEW',
+    value: 'NEW',
+    text: ORDER_TEXT.NEW,
+  },
+  {
+    key: 'CUSTOMER_APPROVE',
+    value: 'CUSTOMER_APPROVE',
+    text: ORDER_TEXT.CUSTOMER_APPROVE,
+  },
+  {
+    key: 'PRODUCE_APPROVE',
+    value: 'PRODUCE_APPROVE',
+    text: ORDER_TEXT.PRODUCE_APPROVE,
+  },
+  {
+    key: 'READY_DELIVERY',
+    value: 'READY_DELIVERY',
+    text: ORDER_TEXT.READY_DELIVERY,
+  },
+  {
+    key: 'DELIVERY',
+    value: 'DELIVERY',
+    text: ORDER_TEXT.DELIVERY,
+  },
+  {
+    key: 'FINISH',
+    value: 'FINISH',
+    text: ORDER_TEXT.FINISH,
+  },
+  {
+    key: 'FAILURE_DELIVERY',
+    value: 'FAILURE_DELIVERY',
+    text: ORDER_TEXT.FAILURE_DELIVERY,
+  },
+  {
+    key: 'CANCEL',
+    value: 'CANCEL',
+    text: ORDER_TEXT.CANCEL,
+  }
+]
+
+
+const paidDropdown = [
+  {
+    key: 'UNPAID',
+    value: 'UNPAID',
+    text: PAID_TEXT.UNPAID,
+  },
+  {
+    key: 'FULL_PAID',
+    value: 'FULL_PAID',
+    text: PAID_TEXT.FULL_PAID,
+  },
+  {
+    key: 'PARTIALLY_PAID',
+    value: 'PARTIALLY_PAID',
+    text: PAID_TEXT.PARTIALLY_PAID,
+  }
+]
+
 function orderToCartState(order, products) {
   const { coupon, receivedDate, productDetails, userInfoOrder, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus, valueCoupon, valuePayment, orderStatus, payment } = order || {};
   const { email, fullName, phone, sex, address } = userInfoOrder || {}
   const { addressDetail, addressType, provinceCode, districCode } = address || {}
   const productsKeyBy = _.keyBy(products, "id")
   const productDetailsConverted = _.map(productDetails, ({ productId, productQuantity }) => ({ productId, productQuantity }))
-  const productDetailsView = _.map(productDetails, ({ productId, productQuantity, price, priceAfterPromotion, totalCost, totalCostAfterPromotion, totalRatePromotion }) => ({ totalRatePromotion, totalCost, totalCostAfterPromotion, productId, productQuantity, price, priceAfterPromotion, productName: _.get(productsKeyBy, [productId, "name"]) }))
+  const productDetailsView = _.map(productDetails, ({ code, name, productId, productQuantity, price, priceAfterPromotion, totalCost, totalCostAfterPromotion, totalRatePromotion }) => ({ code, name, totalRatePromotion, totalCost, totalCostAfterPromotion, productId, productQuantity, price, priceAfterPromotion, productName: _.get(productsKeyBy, [productId, "name"]) }))
   const cart = { payment, orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, productDetails: productDetailsConverted, productDetailsView, sex, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus };
   return cart;
 }
@@ -124,6 +206,9 @@ const DISTRIC_BADINH = "001"
 const DICTRIC_IN_HANOI = district[PROVINCE_HANOI]
 
 function ProductForm(props) {
+  const [paidStatusTemp, setPaidStatusTemp] = useState();
+  const [orderStatusTemp, setOrderStatusTemp] = useState();
+
   const [districtData, setDistricData] = useState(DICTRIC_IN_HANOI)
   const [products, setProducts] = useState();
   const productsKeyBy = useMemo(() => _.keyBy(products, "id"), [products]);
@@ -134,10 +219,14 @@ function ProductForm(props) {
   const { payment, orderStatus, valueCoupon, valuePayment, coupon, receivedDate, email, fullName, phone, addressDetail, addressType, provinceCode, districCode, totalCost, totalCostAfterPromotion, totalRatePromotion, paidStatus } = cart || {};
   const [product, setProduct] = useState();
 
-  const { id, onCancel } = props;
+  const { id, onCancel, onUpdateScreen } = props;
 
   const title = "Xem đơn hàng";
 
+  console.log("cart", cart)
+
+  useEffect(() => { setPaidStatusTemp(paidStatus) }, [paidStatus])
+  useEffect(() => { setOrderStatusTemp(orderStatus) }, [orderStatus])
 
   useEffect(() => {
     setDistricData(district[provinceCode])
@@ -171,7 +260,7 @@ function ProductForm(props) {
             Sản phẩm
             <TextWarning />
           </Label>
-          {_.size(productDetailsView) > 0 && <CartFormProduct data={productDetailsView} productsKeyBy={productsKeyBy} />}
+          {_.size(productDetailsView) > 0 && <CartFormProduct data={productDetailsView} />}
         </FormField>
 
         {totalCost && <FormField>
@@ -225,22 +314,21 @@ function ProductForm(props) {
             <TextWarning />
           </Label>
           <Input
-            placeholder={"Nhập mã giảm giá"}
-            value={coupon || ""}
+            value={coupon || "Không có"}
             name="coupon"
             disabled
           />
         </FormField>
 
 
-        {valueCoupon && <FormField>
+        {<FormField>
           <Label>
             Khuyến mại theo coupon
           <TextWarning />
           </Label>
           <Input
             disabled
-            value={utils.formatMoney(valueCoupon) || ""}
+            value={utils.formatMoney(valueCoupon) || "Không có"}
           />
         </FormField>}
 
@@ -274,21 +362,49 @@ function ProductForm(props) {
             Trạng thái đơn hàng
           <TextWarning />
           </Label>
-          <Input
-            disabled
-            value={orderStatus || ""}
-          />
+          <div style={{ display: "flex", flexDirection: "row" }} >
+            <div style={{ display: "flex", flexDirection: "row", marginRight: "30px", width: "200px" }} >
+              <Dropdown
+                placeholder=' Trạng thái đơn hàng '
+                fluid
+                selection
+                onChange={(e, { value }) => setOrderStatusTemp(value)}
+                value={orderStatusTemp}
+                options={orderDropdown}
+              />
+            </div>
+            <Button onClick={() => api.checkOrder(id, orderStatusTemp).then((res) => {
+              setCart({ ...cart, orderStatus: _.get(res, "orderStatus") })
+              onUpdateScreen()
+              toast.success("Cập nhật thành công")
+            })}>Cập nhật</Button>
+          </div>
         </FormField>}
 
         {paidStatus && <FormField>
           <Label>
             Trạng thái thanh toán
-          <TextWarning />
+            <TextWarning />
           </Label>
-          <Input
-            disabled
-            value={paidStatus || ""}
-          />
+          <div style={{ display: "flex", flexDirection: "row" }} >
+            <div style={{
+              display: "flex", flexDirection: "row", marginRight: "30px", width: "200px"
+            }} >
+              < Dropdown
+                placeholder=' Trạng thái thanh toán '
+                fluid
+                selection
+                onChange={(e, { value }) => setPaidStatusTemp(value)}
+                value={paidStatusTemp}
+                options={paidDropdown}
+              />
+            </div>
+            <Button onClick={() => api.changeOrderPaidStatus(id, paidStatusTemp).then((res) => {
+              setCart({ ...cart, paidStatus: _.get(res, "data.paidStatus") })
+              onUpdateScreen()
+              toast.success("Cập nhật thành công")
+            })}>Cập nhật</Button>
+          </div>
         </FormField>}
 
         {payment && <FormField>
@@ -417,15 +533,15 @@ function ProductForm(props) {
           <Button primary={addressType === "HOME"} disabled>Nhà riêng</Button>
 
         </FormField>
-          <GroupBtn>
-            <WrapperBtn>
-              <FormButton color="#676561" right={24} onClick={onClickCancel}>
-                Thoát
+        <GroupBtn>
+          <WrapperBtn>
+            <FormButton color="#676561" right={24} onClick={onClickCancel}>
+              Thoát
               </FormButton>
-            </WrapperBtn>
-          </GroupBtn>
+          </WrapperBtn>
+        </GroupBtn>
       </FormContainer>
-    </Container>
+    </Container >
   );
 }
 
