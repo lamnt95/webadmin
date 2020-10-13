@@ -339,7 +339,7 @@ function ProductForm(props) {
           </Label>
           <Input
             disabled
-            value={valuePayment || ""}
+            value={utils.formatMoney(valuePayment) || ""}
           />
         </FormField>}
 

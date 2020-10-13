@@ -105,7 +105,7 @@ function ProductRow(props) {
   const { id, code, updatedDate, totalCostAfterPromotion, paidStatus, userInfoOrder, receivedDate, dateFinish, orderStatus } = data || {};
   const isDisable = false;
   const status = getStatus(data)
-
+  console.log("cart row", data, )
   return (
     <TableRow isActive={isActive} isDisable={isDisable}>
       <Cell width={150}>{code}</Cell>
@@ -136,7 +136,7 @@ function ProductRow(props) {
           isActive={isActive}
           isShowEdit
           // isShowReject
-          isShowDelete={PAID_TEXT[paidStatus] === "CANCEL"}
+          isShowDelete={orderStatus === "CANCEL"}
           // isShowApprove
           isShowDropdown
           onDelete={onDeleteOrder}

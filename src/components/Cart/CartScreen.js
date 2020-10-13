@@ -10,6 +10,7 @@ import { useSelector } from "react-redux"
 import axios from "axios"
 import { selectors } from "../../app-redux"
 import utils from "../../utils";
+import moment from "moment";
 
 const Container = styled.div`
   flex: 1;
@@ -36,10 +37,16 @@ const PAID_TEXT = {
   UNPAID: "Chưa thanh toán",
   FULL_PAID: "Đã thanh toán",
   PARTIALLY_PAID: "Thanh toán một phần",
+  ALL: "Tất cả"
 }
 
 
 const paidDropdown = [
+  {
+    key: 'ALL',
+    value: '',
+    text: PAID_TEXT.ALL,
+  },
   {
     key: 'UNPAID',
     value: 'UNPAID',
@@ -58,6 +65,11 @@ const paidDropdown = [
 ]
 
 const optionsDropdown = [
+  {
+    key: "ALL",
+    text: "Tất cả",
+    value: "",
+  },
   {
     key: "NEW",
     text: "Mới",
@@ -129,6 +141,7 @@ function CartScreen(props) {
   const [filter, setFilter] = useState(filterInit);
   const [filter2, setFilter2] = useState(filterInit2);
   const [receivedDate, setReceivedDate] = useState(null)
+  const [toReceivedDate, setToReceivedDate] = useState(null)
   const [fromDateFinish, setFromDateFinish] = useState(null)
   const [toDateFinish, setToDateFinish] = useState(null)
 
@@ -144,10 +157,12 @@ function CartScreen(props) {
     axios.defaults.headers.common['Authorization'] = accessToken;
     setLoading(true)
     const { number: page } = pageInfo || {}
-    api.queryOrder({ orderStatus: activeDropdown, paidStatus: activeDropdown2, page, 
-      fromReceivedDate: receivedDate != null ? utils.formatYYYMMDD(receivedDate) : "" ,
-      fromDateFinish: fromDateFinish != null ? utils.formatYYYMMDD(fromDateFinish) : "" ,
-      toDateFinish: toDateFinish != null ? utils.formatYYYMMDD(toDateFinish) : "" 
+    api.queryOrder({
+      orderStatus: activeDropdown, paidStatus: activeDropdown2, page,
+      fromReceivedDate: receivedDate != null ? utils.formatYYYMMDD(receivedDate) : "",
+      toReceivedDate: toReceivedDate != null ? utils.formatYYYMMDD(toReceivedDate) : "",
+      fromDateFinish: fromDateFinish != null ? utils.formatYYYMMDD(fromDateFinish) : "",
+      toDateFinish: toDateFinish != null ? utils.formatYYYMMDD(toDateFinish) : ""
     }).then((res) => {
       const { content, number, totalPages } = res || {}
       setOrders(content)
@@ -222,7 +237,9 @@ function CartScreen(props) {
           isShowReceivedDate
           receivedDate={receivedDate}
           onChangeReceiveDate={(date) => {
+            // const dateNew = moment(date).subtract(1,"days");
             setReceivedDate(date);
+            setToReceivedDate(date);
             onUpdateScreen()
           }}
 

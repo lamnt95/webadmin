@@ -2,8 +2,8 @@ import _ from "lodash"
 import api from "./api"
 
 function queryOrder(params = {}) {
-  const { page = 0, size = 20, orderStatus = "NEW", paidStatus = "", fromReceivedDate = "", fromDateFinish = "", toDateFinish = "" } = params;
-  const url = `/restaurant-cake-api/v1/orders?orderStatus=${orderStatus}&paidStatus=${paidStatus}&fromReceivedDate=${fromReceivedDate}&fromDateFinish=${fromDateFinish}&toDateFinish=${toDateFinish}&page=${page}&size=${size}`
+  const { page = 0, size = 20, orderStatus = "NEW", paidStatus = "", fromReceivedDate = "", fromDateFinish = "", toDateFinish = "", toReceivedDate="" } = params;
+  const url = `/restaurant-cake-api/v1/orders?orderStatus=${orderStatus}&paidStatus=${paidStatus}&fromReceivedDate=${fromReceivedDate}&toReceivedDate=${toReceivedDate}&fromDateFinish=${fromDateFinish}&toDateFinish=${toDateFinish}&page=${page}&size=${size}`
   return api.get(url).then(({ data }) => data)
 }
 
