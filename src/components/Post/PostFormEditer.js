@@ -158,6 +158,7 @@ class PostFormEditer extends Component {
       this.inputSummary.value = "";
       this.inputCategory.value = "";
       this.inputContent.value = "";
+      this.inputImageAvatarPost.value = "";
     } catch (e) { }
   }
 
@@ -236,7 +237,7 @@ class PostFormEditer extends Component {
   render() {
     const { postData = {} } = this.props;
     const { isDistinc } = this.state;
-    const { viewQuantity, content, id, title } = postData || {};
+    const { viewQuantity, content, id, title, imageAvatarPost, summary } = postData || {};
     const isShowFormFix = !!id;
     const titlePage = isShowFormFix ? "Sửa bài viết" : "Thêm bài viết"
     return (
@@ -256,6 +257,35 @@ class PostFormEditer extends Component {
               ref={(element) => (this.inputTitle = element)}
             />
           </FormField>
+
+          <FormField>
+            <Label>
+              Tổng quan bài viết
+            </Label>
+            <Input
+              placeholder="Tổng quan bài viết"
+              value={summary}
+              name="summary"
+              onInput={(e) => this.onChangeText(e)}
+              onFocus={this.setIsDistincTrue}
+              ref={(element) => (this.inputSummary = element)}
+            />
+          </FormField>
+
+          <FormField>
+            <Label>
+              Ảnh bài viết
+            </Label>
+            <Input
+              placeholder="Ảnh bài viết"
+              value={imageAvatarPost}
+              name="imageAvatarPost"
+              onInput={(e) => this.onChangeText(e)}
+              onFocus={this.setIsDistincTrue}
+              ref={(element) => (this.inputImageAvatarPost = element)}
+            />
+          </FormField>
+
           <FormField>
             <Label>
               Số lượt xem
