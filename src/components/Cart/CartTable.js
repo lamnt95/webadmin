@@ -33,7 +33,7 @@ function CartTable(props) {
           <Header textAlign="center">Ngày nhận hàng</Header>
           <Header textAlign="center">Ngày hoàn tất đơn hàng</Header>
           <Header textAlign="center" width={180}>
-            Ngày cập nhật
+            Ngày tạo đơn hàng
           </Header>
           <Header textAlign="center" width={100}>
             Trạng thái Thanh toán

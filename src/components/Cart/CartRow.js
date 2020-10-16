@@ -102,10 +102,10 @@ const orderDropdown = [
 
 function ProductRow(props) {
   const { data, onEditOrder, isActive, onDeleteOrder, onUpdateScreen } = props;
-  const { id, code, updatedDate, totalCostAfterPromotion, paidStatus, userInfoOrder, receivedDate, dateFinish, orderStatus } = data || {};
+  const { id, code, updatedDate, totalCostAfterPromotion, paidStatus, userInfoOrder, receivedDate, dateFinish, orderStatus, createdDate } = data || {};
   const isDisable = false;
   const status = getStatus(data)
-  console.log("cart row", data, )
+  console.log("cart row", data,)
   return (
     <TableRow isActive={isActive} isDisable={isDisable}>
       <Cell width={150}>{code}</Cell>
@@ -113,7 +113,7 @@ function ProductRow(props) {
       <Cell textAlign="center" width={200}>{utils.formatMoney(totalCostAfterPromotion) || ""}</Cell>
       <Cell textAlign="center" width={150}>{dateUtils.formatDate(receivedDate) || ""}</Cell>
       <Cell textAlign="center" width={200}>{dateFinish && dateUtils.formatDate(dateFinish) || "Chưa hoàn tất"}</Cell>
-      <Cell textAlign="center" width={150}>{dateUtils.formatDate(updatedDate) || ""}</Cell>
+      <Cell textAlign="center" width={150}>{dateUtils.formatDate(createdDate) || ""}</Cell>
       <Cell textAlign="center" width={200}>{PAID_TEXT[paidStatus] || ""}</Cell>
       <Cell textAlign="center" width={200}>{ORDER_TEXT[orderStatus] || ""}</Cell>
       {/* <Cell>
@@ -136,10 +136,8 @@ function ProductRow(props) {
           isActive={isActive}
           isShowEdit
           // isShowReject
-          isShowDelete={orderStatus === "CANCEL"}
           // isShowApprove
           isShowDropdown
-          onDelete={onDeleteOrder}
           onEdit={onEditOrder}
         />
       </Cell>
