@@ -1,6 +1,7 @@
 import React from "react";
 import CKEditor from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+// import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import DocumentEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 
 const editorConfiguration = {
   placeholder: "Nội dung",
@@ -24,7 +25,7 @@ class PluginUploadFile {
     });
   }
 
-  abort() {}
+  abort() { }
 }
 
 function PostEditer(props) {
@@ -34,12 +35,16 @@ function PostEditer(props) {
     onEdit({ target: { name: "content", value } });
   };
   return (
-    <div className="PostEditer">
+    <div className="PostEditer" style={{ background: "#fff", border: "1px solid #d0bebe", borderTop: "0px" }}>
       <CKEditor
-        editor={ClassicEditor}
+        editor={DocumentEditor}
         config={editorConfiguration}
         data={data}
         onInit={(editor) => {
+          editor.ui.getEditableElement().parentElement.insertBefore(
+            editor.ui.view.toolbar.element,
+            editor.ui.getEditableElement()
+          );
           editor.plugins.get("FileRepository").createUploadAdapter = (
             loader
           ) => {
